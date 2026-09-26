@@ -1,0 +1,87 @@
+Items: {
+	ArcReactorMk1: {
+		DisplayName: Arc Reactor Mk I
+		Tooltip:
+			'''
+			Lets you suit up as Iron Man (Suit Up key, or right-click the Stark Tablet)
+			{0}
+			Grants the Repulsors and Shoulder Weapon abilities while suited up
+			"Proof that Tony Stark has a heart."
+			'''
+	}
+
+	ArcReactorMk2: {
+		DisplayName: Arc Reactor Mk II
+		Tooltip:
+			'''
+			Lets you suit up as Iron Man (Suit Up key, or right-click the Stark Tablet)
+			{0}
+			Also grants the chest Unibeam while suited up
+			'''
+	}
+
+	ArcReactorMk3: {
+		DisplayName: Arc Reactor Mk III
+		Tooltip:
+			'''
+			Lets you suit up as Iron Man (Suit Up key, or right-click the Stark Tablet)
+			{0}
+			The suit also becomes immune to lava
+			'''
+	}
+
+	StarkTablet: {
+		DisplayName: Stark Tablet
+		Tooltip:
+			'''
+			Left click to open the Suit Workshop
+			Right click to suit up or down (needs an Arc Reactor equipped)
+			'''
+	}
+
+	Repulsors: {
+		DisplayName: Repulsors
+		Tooltip:
+			'''
+			Fire repulsor blasts from your palms
+			Changes with the suit's Repulsor Mode
+			'''
+	}
+
+	ShoulderWeapon: {
+		DisplayName: Shoulder Weapon
+		Tooltip:
+			'''
+			Fires the suit's shoulder-mounted weapon
+			Choose micro-missiles, minigun, flares, laser, a heavy rocket or cluster bombs in the Suit Workshop
+			'''
+	}
+
+	Unibeam: {
+		DisplayName: Unibeam
+		Tooltip:
+			'''
+			Hold to fire a beam from the Arc Reactor
+			Overheats after a few seconds and has to cool down
+			Changes with the suit's Unibeam Mode
+			'''
+	}
+}
+
+Buffs: {
+	IronManSuit: {
+		DisplayName: Iron Man
+		Description: Suited up
+	}
+}
+
+Projectiles: {
+	SuitShot.DisplayName: Suit Shot
+	SuitExplosion.DisplayName: Explosion
+	UnibeamBeam.DisplayName: Unibeam
+}
+
+Keybinds: {
+	SuitUp.DisplayName: Suit Up
+	SuitWorkshop.DisplayName: Open Suit Workshop
+}
