@@ -433,6 +433,39 @@ namespace MarvelMod.Common.Suits
 						c.BackRect(xs[i], 3 + i, xs[i], 3 + i, i % 3 == 2 ? SuitRole.Eye : SuitRole.Dark);
 					}
 					break;
+				case "Dragon Wings":
+					c.BackRect(0, 2, 2, 2, SuitRole.Accent);
+					c.BackRect(0, 3, 4, 4, SuitRole.Secondary);
+					c.BackRect(0, 5, 4, 6, SuitRole.Secondary);
+					c.BackRect(1, 7, 4, 8, SuitRole.Secondary);
+					c.BackRect(2, 9, 4, 10, SuitRole.Secondary);
+					c.BackRect(0, 2, 0, 6, SuitRole.Accent);
+					c.BackRect(2, 3, 2, 9, SuitRole.Accent);
+					break;
+				case "Sashimono Banner":
+					c.BackRect(4, 0, 4, 14, SuitRole.Trim);
+					c.BackRect(0, 1, 3, 6, SuitRole.Accent);
+					c.BackRect(1, 3, 2, 4, SuitRole.Secondary);
+					break;
+				case "Twin Scabbards":
+					for (int i = 0; i < 10; i++) {
+						c.BackRect(1 + i / 3, 4 + i, 1 + i / 3, 4 + i, SuitRole.Trim);
+						c.BackRect(3 + i / 3, 4 + i, 3 + i / 3, 4 + i, SuitRole.Dark);
+					}
+					break;
+				case "Sun Disc":
+					c.BackRect(1, 3, 4, 8, SuitRole.Secondary);
+					c.BackRect(2, 2, 3, 2, SuitRole.Secondary);
+					c.BackRect(2, 9, 3, 9, SuitRole.Secondary);
+					c.BackRect(2, 4, 3, 7, SuitRole.Reactor);
+					break;
+				case "Data Wings":
+					c.BackRect(4, 3, 4, 10, SuitRole.Trim);
+					c.BackRect(1, 3, 3, 3, SuitRole.Repulsor);
+					c.BackRect(0, 5, 3, 5, SuitRole.Repulsor);
+					c.BackRect(0, 7, 3, 7, SuitRole.Repulsor);
+					c.BackRect(1, 9, 3, 9, SuitRole.Repulsor);
+					break;
 				case "Angel Wings":
 					c.BackRect(0, 3, 3, 4, SuitRole.Accent);
 					c.BackRect(0, 5, 4, 6, SuitRole.Secondary);

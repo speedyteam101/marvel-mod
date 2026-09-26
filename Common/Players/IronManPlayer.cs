@@ -34,7 +34,16 @@ namespace MarvelMod.Common.Players
 
 		public bool SuitActive => Player.HasBuff(ModContent.BuffType<IronManSuit>()) && ReactorTier > 0;
 
-		public SuitStats Stats => SuitStats.For(Suit, ReactorTier);
+		public SuitStats Stats {
+			get {
+				SuitStats stats = SuitStats.For(Suit, ReactorTier);
+				if (adminSuperFlight) {
+					stats.FlightSpeed *= 2f;
+					stats.FlightAcceleration *= 2f;
+				}
+				return stats;
+			}
+		}
 
 		// Flight state and the sprite frame to show.
 		public bool flying;
@@ -43,6 +52,11 @@ namespace MarvelMod.Common.Players
 
 		// Ticks until the Unibeam can fire again.
 		public int unibeamCooldown;
+
+		// Admin panel cheats (not saved).
+		public bool adminGodMode;
+		public bool adminSuperFlight;
+		public bool adminNoCooldowns;
 
 		// Attached weapons: which way the next melee swing goes, and ticks left of Riot Shield blocking.
 		public int swingSide = 1;
@@ -221,6 +235,22 @@ namespace MarvelMod.Common.Players
 				Player.buffImmune[BuffID.Blackout] = true;
 				Player.buffImmune[BuffID.Obstructed] = true;
 			}
+			else if (set == SuitSets.Dragon) {
+				Player.buffImmune[BuffID.OnFire] = true;
+				Player.buffImmune[BuffID.OnFire3] = true;
+				Player.buffImmune[BuffID.Burning] = true;
+				Player.lavaImmune = true;
+				Player.fireWalk = true;
+			}
+			else if (set == SuitSets.Shinobi) {
+				Player.aggro -= 400;
+			}
+			else if (set == SuitSets.Pharaoh) {
+				Player.buffImmune[BuffID.Poisoned] = true;
+				Player.buffImmune[BuffID.Venom] = true;
+				Player.buffImmune[BuffID.Slow] = true;
+				Player.buffImmune[BuffID.Weak] = true;
+			}
 			else if (set == SuitSets.Godly) {
 				foreach (int buff in GodlyImmunities) {
 					Player.buffImmune[buff] = true;
@@ -255,9 +285,38 @@ namespace MarvelMod.Common.Players
 			else if (set == SuitSets.Storm && Main.rand.NextFloat() < 0.25f) {
 				ChainLightning(target, damageDone);
 			}
+			else if (set == SuitSets.Dragon) {
+				target.AddBuff(BuffID.Daybreak, 180);
+				if (Main.rand.NextFloat() < 0.15f) {
+					BreatheFire(target, damageDone);
+				}
+			}
+			else if (set == SuitSets.Pharaoh) {
+				target.AddBuff(BuffID.Venom, 240);
+				target.AddBuff(BuffID.Ichor, 240);
+			}
+			else if (set == SuitSets.Cyber && !fromExplosion && ++cyberHits >= 5) {
+				cyberHits = 0;
+				Vector2 launch = new Vector2(Player.direction * 3f, -6f * Player.gravDir);
+				Projectile.NewProjectile(Player.GetSource_FromThis(), Player.Center, launch, ModContent.ProjectileType<SuitShot>(),
+					System.Math.Max(1, damageDone * 3 / 5), 3f, Player.whoAmI, (float)ShotKind.Missile);
+			}
 			else if (set == SuitSets.Godly && !fromExplosion && Main.rand.NextFloat() < 0.1f) {
 				Projectile.NewProjectile(Player.GetSource_FromThis(), target.Center, Vector2.Zero, ModContent.ProjectileType<SuitExplosion>(),
 					System.Math.Max(1, damageDone), 4f, Player.whoAmI, 100f, 1f);
+			}
+		}
+
+		private int cyberHits;
+
+		// Dragon set: a short burst of flame from the helmet towards the target.
+		private void BreatheFire(NPC target, int damageDone) {
+			Vector2 mouth = Player.Center + new Vector2(Player.direction * 8f, -14f * Player.gravDir);
+			Vector2 aim = (target.Center - mouth).SafeNormalize(Vector2.UnitX * Player.direction);
+			SoundEngine.PlaySound(SoundID.Item34, mouth);
+			for (int i = 0; i < 4; i++) {
+				Projectile.NewProjectile(Player.GetSource_FromThis(), mouth, aim.RotatedByRandom(0.2f) * 10f, ModContent.ProjectileType<SuitShot>(),
+					System.Math.Max(1, damageDone / 4), 0.5f, Player.whoAmI, (float)ShotKind.Flame);
 			}
 		}
 
@@ -301,9 +360,19 @@ namespace MarvelMod.Common.Players
 			SoundEngine.PlaySound(SoundID.Item94, best.Center);
 		}
 
-		// Void set: sometimes attacks pass straight through.
+		// Admin god mode: nothing can hurt you.
+		public override bool ImmuneTo(PlayerDeathReason damageSource, int cooldownCounter, bool dodgeable) {
+			return adminGodMode;
+		}
+
+		// Void and Shinobi sets: sometimes attacks pass straight through.
 		public override bool FreeDodge(Player.HurtInfo info) {
-			if (!SuitActive || SuitSets.WornBy(Suit) != SuitSets.Void || Main.rand.NextFloat() >= 0.12f) {
+			if (!SuitActive) {
+				return false;
+			}
+			SuitSet set = SuitSets.WornBy(Suit);
+			float chance = set == SuitSets.Void ? 0.12f : set == SuitSets.Shinobi ? 0.08f : 0f;
+			if (Main.rand.NextFloat() >= chance) {
 				return false;
 			}
 			Player.SetImmuneTimeForAllTypes(Player.longInvince ? 90 : 60);
@@ -374,6 +443,9 @@ namespace MarvelMod.Common.Players
 		public override void PostUpdate() {
 			if (unibeamCooldown > 0) {
 				unibeamCooldown--;
+			}
+			if (adminNoCooldowns) {
+				unibeamCooldown = 0;
 			}
 			if (lifeStealTimer > 0) {
 				lifeStealTimer--;

@@ -53,13 +53,13 @@ Ability damage grows after you beat Skeletron, the Wall of Flesh, any mechanical
 
 ## Suit Workshop
 
-**1,470 options in 37 categories.** Every category is independent, so they combine into about 4.8 × 10⁴⁹ different suits. The workshop shows both numbers, calculated from the catalogue in `Common/Suits/SuitCatalog.cs`.
+**1,520 options in 37 categories.** Every category is independent, so they combine into about 5.2 × 10⁵⁰ different suits. The workshop shows both numbers, calculated from the catalogue in `Common/Suits/SuitCatalog.cs`.
 
 You start with the classic red-and-gold suit's parts and the first option of each category. Other parts must be bought in the Parts Store (below); locked options show their price in the workshop. **Colours, Glow Strength and Glow Pulse are always free.**
 
 | Group | Categories (number of options) |
 | --- | --- |
-| Armour | Helmet (23), Faceplate (17), Eyes (19), Chest (23), Arc Reactor (17), Shoulders (17), Gauntlets (19), Belt (8), Legs (19), Boots (17), Back Module (17). These counts include the 7 premium set pieces in each category except Belt. |
+| Armour | Helmet (28), Faceplate (22), Eyes (24), Chest (28), Arc Reactor (22), Shoulders (22), Gauntlets (24), Belt (8), Legs (24), Boots (22), Back Module (22). These counts include the 12 premium set pieces in each category except Belt. |
 | Paint Job | Pattern (14), Emblem (12), Finish (8: Metallic, Matte, Chrome, Gloss, Stealth, Battle-Damaged, Obsidian, Radiant) |
 | Colours | 11 colour slots with 96 colours each: Primary, Secondary, Accent, Trim, Undersuit, Pattern, Emblem, Eye Glow, Reactor Glow, Repulsor Glow, Thrusters |
 | Effects | Glow Strength (5), Glow Pulse (4), Thruster Trail (12) |
@@ -75,7 +75,7 @@ The **Systems** options change how the suit plays:
 - **Thrusters**: Standard, Racing, Heavy-Lift, Hover (holds altitude when you let go), Afterburner.
 - **Power Core**: Balanced, Overclocked, Efficient, Regenerative, Unstable (damage, attack speed and regeneration trade-offs).
 
-The workshop has a live animated preview, the suit's stats for your current reactor, **Random Armour / Random Colours / Random Everything** buttons (they only pick parts you own), **17 presets** (one per premium set), and **5 save slots** per character. Your design is saved with the character and synced to other players in multiplayer.
+The workshop has a live animated preview, the suit's stats for your current reactor, **Random Armour / Random Colours / Random Everything** buttons (they only pick parts you own), **22 presets** (one per premium set), and **5 save slots** per character. Your design is saved with the character and synced to other players in multiplayer.
 
 ## Attached weapons
 
@@ -103,13 +103,25 @@ Damage below is base damage. Like the other abilities, it grows with bosses beat
 | **Arc Caster** | ranged | 50 | 18g | Plantera | Lightning hits the enemy nearest your cursor and chains to 3 more |
 | **Buzzsaw Launcher** | ranged | 40 | 10g | Wall of Flesh | Saw blades that ricochet off walls up to 4 times |
 
+## Admin panel
+
+Type **`admin!`** in chat and press Enter. The message isn't sent. Instead a password box opens; enter the admin password to open the admin panel. After that, `admin!` opens the panel straight away until you close the game or reload mods.
+
+The panel only affects your own character:
+
+- **Parts:** unlock every part and weapon, or reset all purchases (your suit goes back to the classic parts).
+- **Items and money:** Arc Reactor Mk I / II / III, a Stark Tablet, 1 or 10 platinum coins.
+- **Cheats** (not saved): god mode, super flight (2x flight speed and acceleration), no Unibeam cooldown, full heal.
+
+Only a SHA-256 hash of the password is kept in the code (`Common/Systems/AdminSystem.cs`). This mod ships with its source readable, so the password keeps casual players out but is **not real security**: anyone determined can bypass it.
+
 ## Parts Store
 
 Open it with **P** or the workshop's **Parts Store** button. Pay with coins from your inventory, piggy bank, safe, Defender's Forge or Void Vault. Click anything to see it in the **try-on preview** before you buy, then **Equip** it.
 
 | Tab | What's in it | Price |
 | --- | --- | --- |
-| Premium Sets | 7 sets of 10 pieces each, with set bonuses (below) | per piece, or 15% off when you buy the rest of a set |
+| Premium Sets | 12 sets of 10 pieces each, with set bonuses (below) | per piece, or 15% off when you buy the rest of a set |
 | Weapons | The 17 attached weapons above | 4g - 40g |
 | Armour | Helmets, faceplates, eyes, chests, reactors, shoulders, gauntlets, belts, legs, boots, back modules | 50 silver, going up 50 silver for each later option in a list (up to 8 gold) |
 | Paint & Effects | Patterns, emblems, finishes, thruster trails | 50 silver - 7 gold; trails 1 gold; premium finishes and trails below |
@@ -119,9 +131,9 @@ Premium extras: **Obsidian** finish (8g, after the Wall of Flesh), **Radiant** f
 
 ### Premium sets
 
-![The seven premium sets](docs/sets.png)
+![The twelve premium sets](docs/sets.png)
 
-*Vampiric, Infernal, Titan, Cryo, Storm, Void and Godly, each shown with its preset colours.*
+*Vampiric, Infernal, Titan, Cryo, Storm, Void, Godly, Dragon, Samurai, Shinobi, Pharaoh and Cyber, each shown with its preset colours.*
 
 Each set has a helmet, faceplate, eyes, chest, arc reactor, shoulders, gauntlets, legs, boots and back module. Wear **all 10 pieces while suited up** to get the set bonus. The Belt, colours and Systems options don't matter for the set bonus. The workshop shows how many pieces of the closest set you're wearing.
 
@@ -134,6 +146,11 @@ Each set has a helmet, faceplate, eyes, chest, arc reactor, shoulders, gauntlets
 | **Storm** | Golem | 20g (1p 70g) | +25% move and flight speed. 25% of hits arc lightning to another enemy for half damage. |
 | **Void** | Lunatic Cultist | 30g (2p 55g) | +20% damage. 12% chance to phase through an attack. Immune to Darkness, Blackout and Obstructed. |
 | **Godly** | Moon Lord | 50g (4p 25g) | +30% damage, +10% crit, +30 defense, +10% damage reduction, +8 HP/s regen, +30% flight speed. Immune to most debuffs. 10% of hits call down holy light (a damaging blast). |
+| **Shinobi** | Wall of Flesh | 6g (51g) | +20% move speed, +15% crit. 8% chance to dodge an attack. Enemies are less likely to target you. |
+| **Samurai** | Any mechanical boss | 12g (1p 2g) | +20% melee damage, +15% melee speed, +10% crit. The Katana deals 25% more damage. |
+| **Pharaoh** | Plantera | 15g (1p 27g 50s) | +12% damage, +20 defense. Hits inflict Venom and Ichor. Immune to Poisoned, Venom, Slow and Weak. |
+| **Dragon** | Plantera | 18g (1p 53g) | +20% damage, +20% flight speed. Immune to fire and lava. Hits inflict Daybreak, and 15% of hits make you breathe fire at the target. |
+| **Cyber** | Lunatic Cultist | 30g (2p 55g) | +15% damage, +15% attack speed. Every 5th hit launches a homing missile. |
 
 The "whole set" price is for all 10 pieces. If you already own some pieces, you only pay for the rest.
 

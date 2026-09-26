@@ -2,10 +2,10 @@ A fan-made Marvel mod. Become Iron Man and design your own suit.
 
 - Arc Reactor Mk I / Mk II / Mk III (accessory): wear one to be able to suit up. Higher marks make the suit stronger and unlock more weapons.
 - Suit Up (default key I, or right-click the Stark Tablet): armour, flight (hold Jump in the air, hold Down to dive), water breathing and no fall damage.
-- Suit Workshop (default key O, or left-click the Stark Tablet): over 1,400 customisation options across 37 categories - helmets, faceplates, eyes, chest plates, arc reactors, shoulders, gauntlets, belts, legs, boots, back modules, patterns, emblems, finishes, 11 colour slots with 96 colours each, glow and thruster effects, and weapon and flight systems that change how the suit plays.
+- Suit Workshop (default key O, or left-click the Stark Tablet): over 1,500 customisation options across 37 categories - helmets, faceplates, eyes, chest plates, arc reactors, shoulders, gauntlets, belts, legs, boots, back modules, patterns, emblems, finishes, 11 colour slots with 96 colours each, glow and thruster effects, and weapon and flight systems that change how the suit plays.
 - Suit weapons while suited up: Repulsors, a Shoulder Weapon (micro-missiles, minigun, flares, laser, rocket or cluster bombs) and, from Mk II, the chest Unibeam.
-- Parts Store (default key P): buy parts with coins, try them on first, including seven premium sets with set bonuses: Vampiric, Infernal, Titan, Cryo, Storm, Void and Godly.
+- Parts Store (default key P): buy parts with coins, try them on first, including twelve premium sets with set bonuses: Vampiric, Infernal, Titan, Cryo, Storm, Void, Godly, Dragon, Samurai, Shinobi, Pharaoh and Cyber.
 - Two weapon slots for attached weapons: Energy Sword, Riot Shield, Battle Axe, Throwing Spear, Reaper Scythe, Katana, Anti-Tank Railgun, Warhammer, Energy Whip, Chakram, Flamethrower, Plasma Cannon, Wrist Blades, Grenade Launcher, Energy Lance, Arc Caster and Buzzsaw Launcher.
-- Seventeen preset suits and five save slots for your own designs.
+- Twenty-two preset suits and five save slots for your own designs.
 
 This is an unofficial fan project and is not affiliated with or endorsed by Marvel or Disney.

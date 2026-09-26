@@ -10,6 +10,8 @@ namespace MarvelMod.Common.Suits
 		public int Damage;          // percent, all classes
 		public int AttackSpeed;     // percent, all classes
 		public int Crit;            // percent, all classes
+		public int MeleeDamage;     // percent, melee only
+		public int MeleeSpeed;      // percent, melee only
 		public int MoveSpeed;       // percent
 		public int LifeRegen;       // health per second
 		public float FlightSpeed;   // pixels per tick
@@ -128,6 +130,28 @@ namespace MarvelMod.Common.Suits
 				stats.FlightSpeed *= 1.3f;
 			}
 
+			else if (stats.Set == SuitSets.Dragon) {
+				stats.Damage += 20;
+				stats.FlightSpeed *= 1.2f;
+			}
+			else if (stats.Set == SuitSets.Samurai) {
+				stats.MeleeDamage += 20;
+				stats.MeleeSpeed += 15;
+				stats.Crit += 10;
+			}
+			else if (stats.Set == SuitSets.Shinobi) {
+				stats.MoveSpeed += 20;
+				stats.Crit += 15;
+			}
+			else if (stats.Set == SuitSets.Pharaoh) {
+				stats.Damage += 12;
+				defense += 20;
+			}
+			else if (stats.Set == SuitSets.Cyber) {
+				stats.Damage += 15;
+				stats.AttackSpeed += 15;
+			}
+
 			stats.Defense = (int)defense;
 			stats.LifeRegen = System.Math.Max(0, stats.LifeRegen);
 			stats.DamageReduction = System.Math.Max(0, stats.DamageReduction);
@@ -141,6 +165,8 @@ namespace MarvelMod.Common.Suits
 			player.GetAttackSpeed(Terraria.ModLoader.DamageClass.Generic) += AttackSpeed / 100f;
 			player.GetCritChance(Terraria.ModLoader.DamageClass.Generic) += Crit;
 			player.moveSpeed += MoveSpeed / 100f;
+			player.GetDamage(Terraria.ModLoader.DamageClass.Melee) += MeleeDamage / 100f;
+			player.GetAttackSpeed(Terraria.ModLoader.DamageClass.Melee) += MeleeSpeed / 100f;
 			if (NoKnockback) {
 				player.noKnockback = true;
 			}

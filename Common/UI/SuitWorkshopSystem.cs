@@ -8,16 +8,20 @@ using Terraria.UI;
 
 namespace MarvelMod.Common.UI
 {
-	// Opens, updates and draws the Suit Workshop and the Parts Store (one at a time).
+	// Opens, updates and draws the Suit Workshop, the Parts Store and the admin screens (one at a time).
 	public class SuitWorkshopSystem : ModSystem
 	{
 		private static UserInterface userInterface;
 		private static SuitWorkshopState state;
 		private static PartsStoreState store;
+		private static AdminPasswordState passwordPrompt;
+		private static AdminPanelState adminPanel;
 
 		public static bool Visible => userInterface?.CurrentState != null;
 		public static bool WorkshopOpen => Visible && userInterface.CurrentState == state;
 		public static bool StoreOpen => Visible && userInterface.CurrentState == store;
+		public static bool PasswordPromptOpen => Visible && userInterface.CurrentState == passwordPrompt;
+		public static object PasswordPromptInputOwner => passwordPrompt?.InputOwner;
 
 		public override void Load() {
 			if (!Main.dedServ) {
@@ -26,6 +30,10 @@ namespace MarvelMod.Common.UI
 				state.Activate();
 				store = new PartsStoreState();
 				store.Activate();
+				passwordPrompt = new AdminPasswordState();
+				passwordPrompt.Activate();
+				adminPanel = new AdminPanelState();
+				adminPanel.Activate();
 			}
 		}
 
@@ -33,6 +41,8 @@ namespace MarvelMod.Common.UI
 			userInterface = null;
 			state = null;
 			store = null;
+			passwordPrompt = null;
+			adminPanel = null;
 		}
 
 		// Toggles the Suit Workshop. Opening it closes the Parts Store and vice versa.
@@ -69,6 +79,24 @@ namespace MarvelMod.Common.UI
 			}
 			store.Refresh();
 			userInterface.SetState(store);
+			SoundEngine.PlaySound(SoundID.MenuOpen);
+		}
+
+		public static void OpenPasswordPrompt() {
+			if (userInterface == null) {
+				return;
+			}
+			passwordPrompt.Reset();
+			userInterface.SetState(passwordPrompt);
+			SoundEngine.PlaySound(SoundID.MenuOpen);
+		}
+
+		public static void OpenAdminPanel() {
+			if (userInterface == null || !Systems.AdminSystem.Unlocked) {
+				return;
+			}
+			adminPanel.Refresh();
+			userInterface.SetState(adminPanel);
 			SoundEngine.PlaySound(SoundID.MenuOpen);
 		}
 

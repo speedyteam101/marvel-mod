@@ -369,9 +369,205 @@ namespace MarvelMod.Common.Suits
 			}
 		};
 
+		public static readonly SuitSet Dragon = new() {
+			Name = "Dragon",
+			Bonus = "+20% damage, +20% flight speed. Immune to fire and lava. Hits inflict Daybreak, and 15% of hits make you breathe fire at the target.",
+			Requirement = ShopRequirement.Plantera,
+			PricePerPiece = 18 * Gold,
+			Helmet = new("Dragon Helm",
+				"A......A.",
+				"AA....AA.",
+				".APPPPPA.",
+				".PPPPPPP.",
+				"SPPPPPPPS",
+				".PPPPPPP.",
+				".PPPPPPP.",
+				".PPPPPPP.",
+				"..PPPPP.."),
+			Faceplate = new("Dragon Snout", "SSSSSSS", ".SSSSS.", ".STSTS.", "..TST.."),
+			Eyes = new("Serpent Eyes", ".E...E.", "EE...EE"),
+			Chest = new("Scale Plate",
+				".PPPPPPPPP.",
+				"PSPSPSPSPSP",
+				"PPSPSPSPSPP",
+				"PSPSPSPSPSP",
+				"PPSPSPSPSPP",
+				".SPSPSPSPS.",
+				".PPSPSPSPP.",
+				"..PPPPPPP.."),
+			Reactor = new("Dragon Heart", ".RRR.", "RRRRR", "..R.."),
+			Shoulders = new("Spined Pauldrons", "A.A.", "PPPP", "SSSS", ".PP."),
+			Gauntlets = new("Talon Gauntlets", ".SS.", ".SS.", ".PP.", ".SS.", "AAAA"),
+			Legs = new("Scaled Greaves", "PPPPPPPPP", "SPSP.PSPS", "PSPS.SPSP", "SPSP.PSPS", "PSPS.SPSP", "PPPP.PPPP"),
+			Boots = new("Clawed Boots", ".SSSS.SSSS.", ".SSSS.SSSS.", "ASSSA.ASSSA"),
+			Back = "Dragon Wings",
+			Colours = new[] {
+				("primaryColour", "Dark Green"), ("secondaryColour", "Rich Gold"), ("accentColour", "Bright Gold"),
+				("trimColour", "Bronze"), ("undersuitColour", "Deep Green"), ("eyeColour", "Bright Yellow"),
+				("reactorColour", "Bright Orange"), ("repulsorColour", "Bright Orange"), ("thrusterColour", "Pure Orange")
+			}
+		};
+
+		public static readonly SuitSet Samurai = new() {
+			Name = "Samurai",
+			Bonus = "+20% melee damage, +15% melee speed, +10% crit. The Katana deals 25% more damage.",
+			Requirement = ShopRequirement.MechBoss,
+			PricePerPiece = 12 * Gold,
+			Helmet = new("Kabuto Helm",
+				"A.......A",
+				".AA...AA.",
+				"..AAAAA..",
+				".TPPPPPT.",
+				"TPPPPPPPT",
+				".PPPPPPP.",
+				".PPPPPPP.",
+				".PPPPPPP.",
+				"..PPPPP.."),
+			Faceplate = new("Menpo Mask", ".SSSSS.", ".OSSSO.", ".SSSSS.", ".TTTTT."),
+			Eyes = new("Ronin Slits", ".......", "EE.E.EE"),
+			Chest = new("Lamellar Do",
+				".PPPPPPPPP.",
+				"TTTTTTTTTTT",
+				"PPPPPPPPPPP",
+				"TTTTTTTTTTT",
+				"PPPPPPPPPPP",
+				".TTTTTTTTT.",
+				".PPPPPPPPP.",
+				"..TTTTTTT.."),
+			Reactor = new("Mon Crest", ".TRT.", "RTRTR", ".TRT."),
+			Shoulders = new("Sode Plates", "TTTT", "PPPP", "TTTT", "PPPP"),
+			Gauntlets = new("Kote Bracers", ".TT.", ".PP.", ".TT.", ".PP.", ".SS."),
+			Legs = new("Haidate Guards", "TTTTTTTTT", "PPPP.PPPP", "TTTT.TTTT", "PPPP.PPPP", "PSSP.PSSP", "PPPP.PPPP"),
+			Boots = new("Suneate Boots", ".TTTT.TTTT.", ".SSSS.SSSS.", "SSSSS.SSSSS"),
+			Back = "Sashimono Banner",
+			Colours = new[] {
+				("primaryColour", "Rich Red"), ("secondaryColour", "Black"), ("accentColour", "Pure Gold"),
+				("trimColour", "Gunmetal"), ("undersuitColour", "Black"), ("eyeColour", "White"),
+				("reactorColour", "Pale Gold"), ("repulsorColour", "Pale Red")
+			}
+		};
+
+		public static readonly SuitSet Shinobi = new() {
+			Name = "Shinobi",
+			Bonus = "+20% move speed, +15% crit. 8% chance to dodge attacks. Enemies are less likely to target you.",
+			Requirement = ShopRequirement.Hardmode,
+			PricePerPiece = 6 * Gold,
+			Helmet = new("Shinobi Hood",
+				".........",
+				"..PPPPP..",
+				".PPPPPPP.",
+				"APPPPPPP.",
+				"AAPPPPPP.",
+				"A.PPPPPP.",
+				".PPPPPPP.",
+				".PPPPPPP.",
+				"..PPPPP.."),
+			Faceplate = new("Shinobi Wrap", ".......", ".......", "SSSSSSS", ".SSSSS."),
+			Eyes = new("Shadow Slit", ".......", "..EEE.."),
+			Chest = new("Wrapped Gi",
+				".PPPPPPPPP.",
+				"PPSPPPPPPPP",
+				"PPPSPPPPPPP",
+				"PPPPSPPPPPP",
+				"PPPPPSPPPPP",
+				".TTTTTTTTT.",
+				".PPPPPPPPP.",
+				"..PPPPPPP.."),
+			Reactor = new("Shuriken Core", "R...R", ".RRR.", "R...R"),
+			Shoulders = new("Wrap Guards", "..PP", ".PPP", ".PPP", ".PP."),
+			Gauntlets = new("Hand Wraps", ".SS.", ".PP.", ".SS.", ".PP.", ".SS."),
+			Legs = new("Tabi Legs", "PPPPPPPPP", "PPPP.PPPP", "PPPP.PPPP", "SSSS.SSSS", "PPPP.PPPP", "PPPP.PPPP"),
+			Boots = new("Tabi Boots", ".SSSS.SSSS.", ".SSSS.SSSS.", ".SSSS.SSSS."),
+			Back = "Twin Scabbards",
+			Colours = new[] {
+				("primaryColour", "Graphite"), ("secondaryColour", "Deep Blue"), ("accentColour", "Pure Red"),
+				("trimColour", "Deep Red"), ("undersuitColour", "Black"), ("eyeColour", "Pale Sky"),
+				("reactorColour", "Soft Sky"), ("thrusterTrail", "Smoke")
+			}
+		};
+
+		public static readonly SuitSet Pharaoh = new() {
+			Name = "Pharaoh",
+			Bonus = "+12% damage, +20 defense. Hits inflict Venom and Ichor. Immune to Poisoned, Venom, Slow and Weak.",
+			Requirement = ShopRequirement.Plantera,
+			PricePerPiece = 15 * Gold,
+			Helmet = new("Nemes Crown",
+				"....A....",
+				"..SSSSS..",
+				".SPSPSPS.",
+				"SPSPSPSPS",
+				"SPPPPPPPS",
+				"SPPPPPPPS",
+				"SPPPPPPPS",
+				"S.PPPPP.S",
+				"S.PPPPP.S"),
+			Faceplate = new("Golden Mask", "SSSSSSS", "SSSSSSS", ".SSSSS.", "..SAS.."),
+			Eyes = new("Kohl Eyes", ".OO.OO.", ".EE.EE."),
+			Chest = new("Pectoral Collar",
+				".SSSSSSSSS.",
+				"SASASASASAS",
+				"PSSSSSSSSSP",
+				"PPPPPPPPPPP",
+				"PPPPPPPPPPP",
+				".PPPPPPPPP.",
+				".PPPSSSPPP.",
+				"..PPPPPPP.."),
+			Reactor = new("Scarab", ".RRR.", "RRRRR", "R.R.R"),
+			Shoulders = new("Sun Discs", ".SS.", "SAAS", "SAAS", ".SS."),
+			Gauntlets = new("Cuff Bands", ".SS.", ".PP.", ".PP.", ".SS.", ".PP."),
+			Legs = new("Linen Wraps", "SSSSSSSSS", "PPPP.PPPP", "PSPP.PPSP", "PPPP.PPPP", "PPSP.PSPP", "PPPP.PPPP"),
+			Boots = new("Sandals of Ra", ".PPPP.PPPP.", ".SSSS.SSSS.", "SSSSS.SSSSS"),
+			Back = "Sun Disc",
+			Colours = new[] {
+				("primaryColour", "Ivory"), ("secondaryColour", "Pure Gold"), ("accentColour", "Rich Blue"),
+				("trimColour", "Bronze"), ("undersuitColour", "Champagne"), ("eyeColour", "Bright Sky"),
+				("reactorColour", "Bright Cyan"), ("repulsorColour", "Pale Gold")
+			}
+		};
+
+		public static readonly SuitSet Cyber = new() {
+			Name = "Cyber",
+			Bonus = "+15% damage, +15% attack speed. Every 5th hit launches a homing missile.",
+			Requirement = ShopRequirement.Cultist,
+			PricePerPiece = 30 * Gold,
+			Helmet = new("Neon Visor Helm",
+				".........",
+				"..PPPPP..",
+				".PPPPPPP.",
+				".PPPPPPPA",
+				".PPPPPPP.",
+				".PPPPPPP.",
+				"TPPPPPPP.",
+				".PPPPPPP.",
+				"..PPPPP.."),
+			Faceplate = new("Holo Visor", "HHHHHHH", "HHHHHHH", ".SSSSS.", "..SSS.."),
+			Eyes = new("Scanline", "E.E.E.E", ".E.E.E."),
+			Chest = new("Circuit Plate",
+				".PPPPPPPPP.",
+				"PHPPPPPPPHP",
+				"PHPPPPPPPHP",
+				"PHHHPPPHHHP",
+				"PPPHPPPHPPP",
+				".PPHHHHHPP.",
+				".PPPPPPPPP.",
+				"..PPPPPPP.."),
+			Reactor = new("Data Core", "RRRRR", "RHRHR", "RRRRR"),
+			Shoulders = new("Neon Pads", ".PPP", "HPPP", "PPPP", ".PH."),
+			Gauntlets = new("Holo Gauntlets", ".SS.", ".HS.", ".SS.", ".SH.", ".SS."),
+			Legs = new("Light Strips", "PPPPPPPPP", "PHPP.PPHP", "PHPP.PPHP", "PHPP.PPHP", "PHPP.PPHP", "PPPP.PPPP"),
+			Boots = new("Hover Boots", ".SSSS.SSSS.", ".SSSS.SSSS.", ".HHH...HHH."),
+			Back = "Data Wings",
+			Colours = new[] {
+				("primaryColour", "Black"), ("secondaryColour", "Graphite"), ("accentColour", "Bright Magenta"),
+				("trimColour", "Gunmetal"), ("undersuitColour", "Black"), ("eyeColour", "Bright Magenta"),
+				("reactorColour", "Bright Cyan"), ("repulsorColour", "Bright Cyan"), ("thrusterColour", "Bright Magenta")
+			}
+		};
+
 		private const long Gold = 10000;
 
-		public static readonly SuitSet[] All = { Vampiric, Infernal, Titan, Cryo, Storm, Void, Godly };
+		// Only ever add sets to the end: their pieces are appended to the option lists in this order, and saved suits store option positions.
+		public static readonly SuitSet[] All = { Vampiric, Infernal, Titan, Cryo, Storm, Void, Godly, Dragon, Samurai, Shinobi, Pharaoh, Cyber };
 
 		// The set whose every piece is in this design, if any.
 		public static SuitSet WornBy(SuitConfig config) {

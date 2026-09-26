@@ -72,6 +72,9 @@ namespace MarvelMod.Content.Abilities
 		public override void ModifyWeaponDamage(Player player, ref StatModifier damage) {
 			base.ModifyWeaponDamage(player, ref damage);
 			damage *= WeaponOf(player).Damage / (float)BaseDamage;
+			if (WeaponOf(player).Name == "Katana" && SuitSets.WornBy(SuitOf(player)) == SuitSets.Samurai) {
+				damage *= 1.25f; // Samurai set bonus
+			}
 		}
 
 		public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback) {

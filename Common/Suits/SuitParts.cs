@@ -508,7 +508,8 @@ namespace MarvelMod.Common.Suits
 			"None", "Jetpack", "Flight Fins", "Wing Blades", "Twin Tanks",
 			"Missile Pods", "Antennae", "Power Pack", "Radiator Fins", "Rocket Boosters",
 			// Premium set backs
-			"Bat Wings", "Flame Wings", "Reactor Stacks", "Crystal Shards", "Tesla Array", "Void Tendrils", "Angel Wings"
+			"Bat Wings", "Flame Wings", "Reactor Stacks", "Crystal Shards", "Tesla Array", "Void Tendrils", "Angel Wings",
+			"Dragon Wings", "Sashimono Banner", "Twin Scabbards", "Sun Disc", "Data Wings"
 		};
 
 		public static readonly string[] Patterns = {
