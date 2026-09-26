@@ -3,6 +3,7 @@ using MarvelMod.Common.Systems;
 using MarvelMod.Common.UI;
 using MarvelMod.Content.Abilities;
 using MarvelMod.Content.Buffs;
+using MarvelMod.Content.Projectiles;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -43,6 +44,83 @@ namespace MarvelMod.Common.Players
 		// Ticks until the Unibeam can fire again.
 		public int unibeamCooldown;
 
+		// Parts bought in the Parts Store, by ShopItem.Key.
+		public HashSet<string> OwnedParts = new();
+
+		private int lifeStealTimer;
+
+		public bool Owns(SuitCategory category, int index) {
+			ShopItem item = SuitShop.Get(category, index);
+			return item == null || item.Free || OwnedParts.Contains(item.Key);
+		}
+
+		// Parts of this design the player doesn't own yet.
+		public List<ShopItem> MissingParts(SuitConfig design) {
+			var missing = new List<ShopItem>();
+			foreach (SuitCategory category in SuitCatalog.All) {
+				if (!Owns(category, design[category])) {
+					missing.Add(SuitShop.Get(category, design[category]));
+				}
+			}
+			return missing;
+		}
+
+		// Buys one part. Returns a message for the store to show.
+		public string Buy(ShopItem item) {
+			if (item.Free || OwnedParts.Contains(item.Key)) {
+				return $"You already own {item.Name}.";
+			}
+			if (!ShopRequirements.Met(item.Requirement)) {
+				return $"Not for sale yet: {ShopRequirements.Text(item.Requirement)}.";
+			}
+			if (!Player.BuyItem(item.Price)) {
+				return "You can't afford that.";
+			}
+			OwnedParts.Add(item.Key);
+			SoundEngine.PlaySound(SoundID.Coins);
+			return $"Bought {item.Name}!";
+		}
+
+		// Price of the pieces of a set the player is still missing, with the whole-set discount.
+		public long SetPrice(SuitSet set) {
+			int missing = 0;
+			foreach (var (category, option) in set.Pieces()) {
+				if (!Owns(category, category.IndexOf(option))) {
+					missing++;
+				}
+			}
+			return set.PricePerPiece * missing * 85 / 100;
+		}
+
+		public int SetPiecesOwned(SuitSet set) {
+			int owned = 0;
+			foreach (var (category, option) in set.Pieces()) {
+				if (Owns(category, category.IndexOf(option))) {
+					owned++;
+				}
+			}
+			return owned;
+		}
+
+		// Buys every missing piece of a set at once, 15% cheaper.
+		public string BuySet(SuitSet set) {
+			long price = SetPrice(set);
+			if (price == 0) {
+				return $"You already own the whole {set.Name} set.";
+			}
+			if (!ShopRequirements.Met(set.Requirement)) {
+				return $"Not for sale yet: {ShopRequirements.Text(set.Requirement)}.";
+			}
+			if (!Player.BuyItem(price)) {
+				return "You can't afford that.";
+			}
+			foreach (var (category, option) in set.Pieces()) {
+				OwnedParts.Add(SuitShop.Get(category, category.IndexOf(option)).Key);
+			}
+			SoundEngine.PlaySound(SoundID.Coins);
+			return $"Bought the {set.Name} set!";
+		}
+
 		public override void ResetEffects() {
 			reactorTierThisFrame = 0;
 		}
@@ -74,6 +152,9 @@ namespace MarvelMod.Common.Players
 			if (IronManKeybinds.Workshop.JustPressed) {
 				SuitWorkshopSystem.Toggle();
 			}
+			if (IronManKeybinds.Store.JustPressed) {
+				SuitWorkshopSystem.ToggleStore();
+			}
 		}
 
 		public override void PostUpdateEquips() {
@@ -93,6 +174,134 @@ namespace MarvelMod.Common.Players
 				Player.lavaImmune = true;
 				Player.fireWalk = true;
 			}
+			ApplySetEffects(SuitSets.WornBy(Suit));
+		}
+
+		private static readonly int[] GodlyImmunities = {
+			BuffID.Poisoned, BuffID.Venom, BuffID.OnFire, BuffID.OnFire3, BuffID.Burning, BuffID.Bleeding, BuffID.Confused,
+			BuffID.Slow, BuffID.Weak, BuffID.BrokenArmor, BuffID.Silenced, BuffID.Cursed, BuffID.Darkness, BuffID.Blackout,
+			BuffID.Chilled, BuffID.Frozen, BuffID.Ichor, BuffID.CursedInferno, BuffID.Frostburn, BuffID.Frostburn2,
+			BuffID.Electrified, BuffID.Obstructed, BuffID.Stoned, BuffID.Webbed, BuffID.WitheredArmor, BuffID.WitheredWeapon
+		};
+
+		// Set bonus effects that aren't plain stats (those are in SuitStats).
+		private void ApplySetEffects(SuitSet set) {
+			if (set == SuitSets.Vampiric) {
+				Player.buffImmune[BuffID.Bleeding] = true;
+			}
+			else if (set == SuitSets.Infernal) {
+				Player.buffImmune[BuffID.OnFire] = true;
+				Player.buffImmune[BuffID.OnFire3] = true;
+				Player.buffImmune[BuffID.Burning] = true;
+				Player.lavaImmune = true;
+				Player.fireWalk = true;
+			}
+			else if (set == SuitSets.Titan) {
+				Player.thorns += 0.5f;
+			}
+			else if (set == SuitSets.Cryo) {
+				Player.buffImmune[BuffID.Chilled] = true;
+				Player.buffImmune[BuffID.Frozen] = true;
+				Player.buffImmune[BuffID.Frostburn] = true;
+				Player.buffImmune[BuffID.Frostburn2] = true;
+			}
+			else if (set == SuitSets.Void) {
+				Player.buffImmune[BuffID.Darkness] = true;
+				Player.buffImmune[BuffID.Blackout] = true;
+				Player.buffImmune[BuffID.Obstructed] = true;
+			}
+			else if (set == SuitSets.Godly) {
+				foreach (int buff in GodlyImmunities) {
+					Player.buffImmune[buff] = true;
+				}
+				Lighting.AddLight(Player.Top, 0.9f, 0.8f, 0.4f);
+			}
+		}
+
+		public override void OnHitNPCWithItem(Item item, NPC target, NPC.HitInfo hit, int damageDone) {
+			SetOnHit(target, damageDone, false);
+		}
+
+		public override void OnHitNPCWithProj(Projectile proj, NPC target, NPC.HitInfo hit, int damageDone) {
+			SetOnHit(target, damageDone, proj.type == ModContent.ProjectileType<SuitExplosion>());
+		}
+
+		// On-hit set bonuses. fromExplosion stops holy light from triggering more holy light.
+		private void SetOnHit(NPC target, int damageDone, bool fromExplosion) {
+			if (!SuitActive || Player.whoAmI != Main.myPlayer) {
+				return;
+			}
+			SuitSet set = SuitSets.WornBy(Suit);
+			if (set == SuitSets.Vampiric) {
+				DrinkBlood(target, damageDone);
+			}
+			else if (set == SuitSets.Infernal) {
+				target.AddBuff(BuffID.OnFire3, 240);
+			}
+			else if (set == SuitSets.Cryo) {
+				target.AddBuff(BuffID.Frostburn2, 240);
+			}
+			else if (set == SuitSets.Storm && Main.rand.NextFloat() < 0.25f) {
+				ChainLightning(target, damageDone);
+			}
+			else if (set == SuitSets.Godly && !fromExplosion && Main.rand.NextFloat() < 0.1f) {
+				Projectile.NewProjectile(Player.GetSource_FromThis(), target.Center, Vector2.Zero, ModContent.ProjectileType<SuitExplosion>(),
+					System.Math.Max(1, damageDone), 4f, Player.whoAmI, 100f, 1f);
+			}
+		}
+
+		private void DrinkBlood(NPC target, int damageDone) {
+			if (lifeStealTimer > 0 || target.immortal || target.lifeMax <= 5 || target.friendly || Player.statLife >= Player.statLifeMax2) {
+				return;
+			}
+			int heal = System.Math.Clamp(damageDone * 8 / 100, 1, 12);
+			heal = System.Math.Min(heal, Player.statLifeMax2 - Player.statLife);
+			Player.statLife += heal;
+			Player.HealEffect(heal);
+			lifeStealTimer = 6;
+			for (int i = 0; i < 4; i++) {
+				Dust.NewDust(target.position, target.width, target.height, DustID.Blood);
+			}
+		}
+
+		// Strikes the closest other enemy for half the damage.
+		private void ChainLightning(NPC source, int damageDone) {
+			NPC best = null;
+			float bestDistance = 320f;
+			foreach (NPC npc in Main.ActiveNPCs) {
+				if (npc.whoAmI == source.whoAmI || !npc.CanBeChasedBy()) {
+					continue;
+				}
+				float distance = Vector2.Distance(npc.Center, source.Center);
+				if (distance < bestDistance) {
+					best = npc;
+					bestDistance = distance;
+				}
+			}
+			if (best == null) {
+				return;
+			}
+			best.SimpleStrikeNPC(System.Math.Max(1, damageDone / 2), best.Center.X > source.Center.X ? 1 : -1, false, 0f, DamageClass.Ranged);
+			for (float t = 0f; t <= 1f; t += 0.08f) {
+				Vector2 point = Vector2.Lerp(source.Center, best.Center, t) + Main.rand.NextVector2Circular(6f, 6f);
+				Dust dust = Dust.NewDustPerfect(point, DustID.Electric, Vector2.Zero, 0, default, 0.8f);
+				dust.noGravity = true;
+			}
+			SoundEngine.PlaySound(SoundID.Item94, best.Center);
+		}
+
+		// Void set: sometimes attacks pass straight through.
+		public override bool FreeDodge(Player.HurtInfo info) {
+			if (!SuitActive || SuitSets.WornBy(Suit) != SuitSets.Void || Main.rand.NextFloat() >= 0.12f) {
+				return false;
+			}
+			Player.SetImmuneTimeForAllTypes(Player.longInvince ? 90 : 60);
+			for (int i = 0; i < 20; i++) {
+				Dust dust = Dust.NewDustDirect(Player.position, Player.width, Player.height, DustID.Shadowflame);
+				dust.noGravity = true;
+				dust.velocity *= 2f;
+			}
+			return true;
 		}
 
 		public override void UpdateLifeRegen() {
@@ -154,6 +363,9 @@ namespace MarvelMod.Common.Players
 		public override void PostUpdate() {
 			if (unibeamCooldown > 0) {
 				unibeamCooldown--;
+			}
+			if (lifeStealTimer > 0) {
+				lifeStealTimer--;
 			}
 
 			UpdateFrame();
@@ -237,6 +449,10 @@ namespace MarvelMod.Common.Players
 						Main.hslToRgb((float)Main.timeForVisualEffects / 90f % 1f, 1f, 0.6f), 0.9f),
 					"Ion" => Dust.NewDustPerfect(position, DustID.TintableDustLighted, velocity * 0.6f, 0, colour, 0.8f),
 					"Electric" => Dust.NewDustPerfect(position, DustID.Electric, velocity, 0, colour, 0.8f),
+					"Blood" => Dust.NewDustPerfect(position, DustID.Blood, velocity, 0, default, 1.3f),
+					"Holy Light" => Dust.NewDustPerfect(position, DustID.GoldFlame, velocity, 0, default, 1.4f),
+					"Frost" => Dust.NewDustPerfect(position, DustID.IceTorch, velocity, 0, default, 1.4f),
+					"Void" => Dust.NewDustPerfect(position, DustID.Shadowflame, velocity, 0, default, 1.3f),
 					_ => Dust.NewDustPerfect(position, DustID.TintableDustLighted, velocity, 0, colour, 1.3f) // Plasma
 				};
 				dust.noGravity = true;
@@ -302,6 +518,7 @@ namespace MarvelMod.Common.Players
 				slots.Add(SavedDesigns[i]?.Save() ?? new TagCompound());
 			}
 			tag["savedDesigns"] = slots;
+			tag["ownedParts"] = new List<string>(OwnedParts);
 		}
 
 		public override void LoadData(TagCompound tag) {
@@ -311,6 +528,28 @@ namespace MarvelMod.Common.Players
 			IList<TagCompound> slots = tag.GetList<TagCompound>("savedDesigns");
 			for (int i = 0; i < DesignSlots && i < slots.Count; i++) {
 				SavedDesigns[i] = slots[i].Count == 0 ? null : SuitConfig.Load(slots[i]);
+			}
+
+			if (tag.ContainsKey("ownedParts")) {
+				OwnedParts = new HashSet<string>(tag.GetList<string>("ownedParts"));
+			}
+			else {
+				// Characters from before the Parts Store keep every part they were already using.
+				GrantParts(Suit);
+				foreach (SuitConfig design in SavedDesigns) {
+					if (design != null) {
+						GrantParts(design);
+					}
+				}
+			}
+		}
+
+		private void GrantParts(SuitConfig design) {
+			foreach (SuitCategory category in SuitCatalog.All) {
+				ShopItem item = SuitShop.Get(category, design[category]);
+				if (item != null && !item.Free) {
+					OwnedParts.Add(item.Key);
+				}
 			}
 		}
 

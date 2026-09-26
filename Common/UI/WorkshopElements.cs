@@ -19,8 +19,10 @@ namespace MarvelMod.Common.UI
 		private static readonly Color Hover = new(90, 110, 190);
 		private static readonly Color Chosen = new(190, 60, 50);
 		private static readonly Color Header = new Color(20, 26, 50) * 0.9f;
+		private static readonly Color LockedColour = new Color(45, 45, 55) * 0.9f;
 
 		public bool Selected;
+		public bool Locked;
 		private readonly bool isHeader;
 
 		public WorkshopButton(string text, Action onClick, float textScale = 0.8f, bool header = false) : base(text, textScale) {
@@ -35,7 +37,7 @@ namespace MarvelMod.Common.UI
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			BackgroundColor = isHeader ? Header : Selected ? Chosen : IsMouseHovering ? Hover : Normal;
+			BackgroundColor = isHeader ? Header : Selected ? Chosen : IsMouseHovering ? Hover : Locked ? LockedColour : Normal;
 			BorderColor = Selected ? Color.Gold : Color.Black;
 			base.DrawSelf(spriteBatch);
 		}
@@ -102,9 +104,15 @@ namespace MarvelMod.Common.UI
 		}
 	}
 
-	// Live, animated preview of the design being edited.
+	// Live, animated preview of a design: the player's own suit by default, or whatever getDesign returns (e.g. a try-on).
 	public class SuitPreview : UIPanel
 	{
+		private readonly Func<SuitConfig> getDesign;
+
+		public SuitPreview(Func<SuitConfig> getDesign = null) {
+			this.getDesign = getDesign;
+		}
+
 		// Frame and how many ticks to show it: stand, walk, aim, fly, fly and aim.
 		private static readonly (SuitFrame Frame, int Ticks)[] Sequence = {
 			(SuitFrame.Idle, 60), (SuitFrame.Walk1, 8), (SuitFrame.Walk2, 8), (SuitFrame.Walk3, 8), (SuitFrame.Walk4, 8),
@@ -137,7 +145,7 @@ namespace MarvelMod.Common.UI
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			base.DrawSelf(spriteBatch);
 			IronManPlayer modPlayer = Main.LocalPlayer.GetModPlayer<IronManPlayer>();
-			SuitTextureCache.Entry textures = SuitTextureCache.Get(modPlayer.Suit);
+			SuitTextureCache.Entry textures = SuitTextureCache.Get(getDesign?.Invoke() ?? modPlayer.Suit);
 
 			CalculatedStyle inner = GetInnerDimensions();
 			float scale = MathF.Floor(Math.Min(inner.Width, inner.Height) / SuitRenderer.FrameWidth);

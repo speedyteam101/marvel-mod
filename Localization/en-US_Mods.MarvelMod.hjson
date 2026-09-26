@@ -34,7 +34,7 @@ Items: {
 		DisplayName: Stark Tablet
 		Tooltip:
 			'''
-			Left click to open the Suit Workshop
+			Left click to open the Suit Workshop (buy new parts from its Parts Store button)
 			Right click to suit up or down (needs an Arc Reactor equipped)
 			'''
 	}
@@ -84,4 +84,5 @@ Projectiles: {
 Keybinds: {
 	SuitUp.DisplayName: Suit Up
 	SuitWorkshop.DisplayName: Open Suit Workshop
+	PartsStore.DisplayName: Open Parts Store
 }

@@ -26,7 +26,7 @@ namespace MarvelMod.Common.Suits
 	// Back modules are drawn in code (SuitRenderer.DrawBack) because they're mostly empty space.
 	public static class SuitParts
 	{
-		public static readonly SuitPart[] Helmets = {
+		public static readonly SuitPart[] Helmets = Join(new SuitPart[] {
 			new("Classic",
 				".........",
 				".........",
@@ -187,9 +187,9 @@ namespace MarvelMod.Common.Suits
 				".PPPPPPP.",
 				".PPPPPPP.",
 				"..PPPPP.."),
-		};
+		}, SuitSets.Parts(s => s.Helmet));
 
-		public static readonly SuitPart[] Faceplates = {
+		public static readonly SuitPart[] Faceplates = Join(new SuitPart[] {
 			new("Classic Mask",
 				".SSSSS.",
 				".SSSSS.",
@@ -240,9 +240,9 @@ namespace MarvelMod.Common.Suits
 				".SASAS.",
 				".SSSSS.",
 				"..SAS.."),
-		};
+		}, SuitSets.Parts(s => s.Faceplate));
 
-		public static readonly SuitPart[] Eyes = {
+		public static readonly SuitPart[] Eyes = Join(new SuitPart[] {
 			new("Classic Slits", ".......", ".EE.EE."),
 			new("Wide Slits", ".......", "EEE.EEE"),
 			new("Narrow", ".......", "..E.E.."),
@@ -255,9 +255,9 @@ namespace MarvelMod.Common.Suits
 			new("Dots", ".......", ".E...E."),
 			new("Goggles", ".EEEEE.", ".EEEEE."),
 			new("Tear", ".EE.EE.", "..E.E.."),
-		};
+		}, SuitSets.Parts(s => s.Eyes));
 
-		public static readonly SuitPart[] Chests = {
+		public static readonly SuitPart[] Chests = Join(new SuitPart[] {
 			new("Classic",
 				".PPPPPPPPP.",
 				"PPPPPPPPPPP",
@@ -402,9 +402,9 @@ namespace MarvelMod.Common.Suits
 				".PPPOPOPPP.",
 				".PPPPOPPPP.",
 				"..PPPPPPP.."),
-		};
+		}, SuitSets.Parts(s => s.Chest));
 
-		public static readonly SuitPart[] Reactors = {
+		public static readonly SuitPart[] Reactors = Join(new SuitPart[] {
 			new("Classic", ".TRT.", "TRRRT", ".TRT."),
 			new("Triangle", "..R..", ".RRR.", "RRRRR"),
 			new("Square", ".RRR.", ".RRR.", ".RRR."),
@@ -415,10 +415,10 @@ namespace MarvelMod.Common.Suits
 			new("Twin Cells", "RR.RR", "RR.RR", "....."),
 			new("Cross", "..R..", "RRRRR", "..R.."),
 			new("Mini", ".TTT.", ".TRT.", ".TTT."),
-		};
+		}, SuitSets.Parts(s => s.Reactor));
 
 		// Left shoulder; the right one is mirrored.
-		public static readonly SuitPart[] Shoulders = {
+		public static readonly SuitPart[] Shoulders = Join(new SuitPart[] {
 			new("Classic", ".PPP", "PPPP", "PPPP", ".PP."),
 			new("Rounded", "..PP", ".PPP", "PPPP", "PPP."),
 			new("Pauldron", "SSSS", "SSSS", "PSSP", ".PP."),
@@ -429,10 +429,10 @@ namespace MarvelMod.Common.Suits
 			new("Trimmed", ".TTT", "TPPP", "TPPP", ".TT."),
 			new("Missile Pod", "SSSP", "SOSP", "SSSP", ".PP."),
 			new("Vented", ".PPP", "POPO", "PPPP", ".PP."),
-		};
+		}, SuitSets.Parts(s => s.Shoulders));
 
 		// Left gauntlet; the right one is mirrored.
-		public static readonly SuitPart[] Gauntlets = {
+		public static readonly SuitPart[] Gauntlets = Join(new SuitPart[] {
 			new("Classic", ".SS.", ".SS.", ".PP.", ".SS.", ".SS."),
 			new("Bracer", ".TT.", ".SS.", ".SS.", ".PP.", ".PP."),
 			new("Heavy", "SSSS", "SSSS", ".SS.", ".PP.", ".PP."),
@@ -445,7 +445,7 @@ namespace MarvelMod.Common.Suits
 			new("Wrist Cannon", ".OO.", "SSSS", ".SS.", ".SS.", ".PP."),
 			new("Shielded", "SS..", "SSS.", "SSS.", ".PP.", ".PP."),
 			new("Claws", ".SS.", ".SS.", ".SS.", ".PP.", "A.A."),
-		};
+		}, SuitSets.Parts(s => s.Gauntlets));
 
 		public static readonly SuitPart[] Belts = {
 			new("Classic", "TTTTTTTTT", "PPPPPPPPP"),
@@ -459,7 +459,7 @@ namespace MarvelMod.Common.Suits
 		};
 
 		// Columns 0-3 are the left leg, column 4 the crotch, columns 5-8 the right leg.
-		public static readonly SuitPart[] Legs = {
+		public static readonly SuitPart[] Legs = Join(new SuitPart[] {
 			new("Classic", "PPPPPPPPP", "PPPP.PPPP", "PPPP.PPPP", "PSSP.PSSP", "PPPP.PPPP", "PPPP.PPPP"),
 			new("Plain", "PPPPPPPPP", "PPPP.PPPP", "PPPP.PPPP", "PPPP.PPPP", "PPPP.PPPP", "PPPP.PPPP"),
 			new("Outer Stripe", "PPPPPPPPP", "APPP.PPPA", "APPP.PPPA", "APPP.PPPA", "APPP.PPPA", "APPP.PPPA"),
@@ -472,10 +472,10 @@ namespace MarvelMod.Common.Suits
 			new("Heavy", "PPPPPPPPP", "PPPPOPPPP", "PPPPOPPPP", "PPPPOPPPP", "PPPPOPPPP", "PPPPOPPPP"),
 			new("Hydraulic", "PPPPPPPPP", "TPPP.PPPT", "TPPP.PPPT", "TSSP.PSST", "TPPP.PPPT", "TPPP.PPPT"),
 			new("Racing", "PPPPPPPPP", "SSPP.PPSS", "SSPP.PPSS", "SSPP.PPSS", "SSPP.PPSS", "SSPP.PPSS"),
-		};
+		}, SuitSets.Parts(s => s.Legs));
 
 		// Columns 0-4 are the left boot, column 5 the gap, columns 6-10 the right boot.
-		public static readonly SuitPart[] Boots = {
+		public static readonly SuitPart[] Boots = Join(new SuitPart[] {
 			new("Classic", ".SSSS.SSSS.", ".SSSS.SSSS.", "SSSSS.SSSSS"),
 			new("Plain", ".PPPP.PPPP.", ".PPPP.PPPP.", "PPPPP.PPPPP"),
 			new("Heavy", "SSSSS.SSSSS", "SSSSS.SSSSS", "OOOOO.OOOOO"),
@@ -486,7 +486,7 @@ namespace MarvelMod.Common.Suits
 			new("Two-Tone", ".PPPP.PPPP.", ".SSSS.SSSS.", "SSSSS.SSSSS"),
 			new("Sleek", ".SSSS.SSSS.", ".SSSS.SSSS.", ".SSSS.SSSS."),
 			new("Stomper", "PPPPP.PPPPP", "SSSSS.SSSSS", "TTTTT.TTTTT"),
-		};
+		}, SuitSets.Parts(s => s.Boots));
 
 		// 5x3 glyphs; '#' is painted in the emblem colour.
 		public static readonly SuitPart[] Emblems = {
@@ -506,7 +506,9 @@ namespace MarvelMod.Common.Suits
 
 		public static readonly string[] BackModules = {
 			"None", "Jetpack", "Flight Fins", "Wing Blades", "Twin Tanks",
-			"Missile Pods", "Antennae", "Power Pack", "Radiator Fins", "Rocket Boosters"
+			"Missile Pods", "Antennae", "Power Pack", "Radiator Fins", "Rocket Boosters",
+			// Premium set backs
+			"Bat Wings", "Flame Wings", "Reactor Stacks", "Crystal Shards", "Tesla Array", "Void Tendrils", "Angel Wings"
 		};
 
 		public static readonly string[] Patterns = {
@@ -514,7 +516,9 @@ namespace MarvelMod.Common.Suits
 			"Split Half", "Checker", "Diagonal", "Circuit", "Camo", "Lower Fade", "Dots"
 		};
 
-		public static readonly string[] Finishes = { "Metallic", "Matte", "Chrome", "Gloss", "Stealth", "Battle-Damaged" };
+		public static readonly string[] Finishes = { "Metallic", "Matte", "Chrome", "Gloss", "Stealth", "Battle-Damaged", "Obsidian", "Radiant" };
+
+		private static SuitPart[] Join(SuitPart[] first, SuitPart[] second) => [.. first, .. second];
 
 		public static string[] Names(SuitPart[] parts) {
 			string[] names = new string[parts.Length];

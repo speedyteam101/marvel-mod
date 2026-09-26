@@ -63,6 +63,15 @@ namespace MarvelMod.Common.Suits
 
 		public static SuitConfig Classic() => Base();
 
+		// One preset per premium set: every piece plus the set's colours.
+		private static Preset ForSet(SuitSet set) {
+			var settings = new List<(SuitCategory, string)>(set.Pieces());
+			foreach (var (key, colour) in set.Colours) {
+				settings.Add((C(key), colour));
+			}
+			return new Preset { Name = $"{set.Name} Set", Settings = settings.ToArray() };
+		}
+
 		public static readonly List<Preset> All = new() {
 			new Preset {
 				Name = "Classic Red & Gold",
@@ -155,5 +164,11 @@ namespace MarvelMod.Common.Suits
 				}
 			},
 		};
+
+		static SuitPresets() {
+			foreach (SuitSet set in SuitSets.All) {
+				All.Add(ForSet(set));
+			}
+		}
 	}
 }

@@ -12,8 +12,9 @@ An unofficial, fan-made Marvel mod for **tModLoader** (Terraria 1.4.4). Become I
 2. Equip the Arc Reactor as an accessory.
 3. Press **I** (Suit Up) or right-click with the Stark Tablet to suit up. Press it again to suit down.
 4. Press **O** (Suit Workshop) or left-click with the Stark Tablet to design your suit.
+5. Press **P** (Parts Store), or use the **Parts Store** button in the workshop, to buy more parts with coins.
 
-Both keys can be changed in *Settings → Controls → Mod Controls*. If another mod already uses I or O, rebind them there.
+All three keys can be changed in *Settings → Controls → Mod Controls*. If another mod already uses I, O or P, rebind them there.
 
 ## Items
 
@@ -52,14 +53,16 @@ Ability damage grows after you beat Skeletron, the Wall of Flesh, any mechanical
 
 ## Suit Workshop
 
-**1,262 options in 34 categories.** Every category is independent, so they combine into about 6.6 × 10⁴² different suits. The workshop shows both numbers, calculated from the catalogue in `Common/Suits/SuitCatalog.cs`.
+**1,338 options in 34 categories.** Every category is independent, so they combine into about 1.5 × 10⁴⁵ different suits. The workshop shows both numbers, calculated from the catalogue in `Common/Suits/SuitCatalog.cs`.
+
+You start with the classic red-and-gold suit's parts and the first option of each category. Other parts must be bought in the Parts Store (below); locked options show their price in the workshop. **Colours, Glow Strength and Glow Pulse are always free.**
 
 | Group | Categories (number of options) |
 | --- | --- |
-| Armour | Helmet (16), Faceplate (10), Eyes (12), Chest (16), Arc Reactor (10), Shoulders (10), Gauntlets (12), Belt (8), Legs (12), Boots (10), Back Module (10) |
-| Paint Job | Pattern (14), Emblem (12), Finish (6: Metallic, Matte, Chrome, Gloss, Stealth, Battle-Damaged) |
+| Armour | Helmet (23), Faceplate (17), Eyes (19), Chest (23), Arc Reactor (17), Shoulders (17), Gauntlets (19), Belt (8), Legs (19), Boots (17), Back Module (17). These counts include the 7 premium set pieces in each category except Belt. |
+| Paint Job | Pattern (14), Emblem (12), Finish (8: Metallic, Matte, Chrome, Gloss, Stealth, Battle-Damaged, Obsidian, Radiant) |
 | Colours | 11 colour slots with 96 colours each: Primary, Secondary, Accent, Trim, Undersuit, Pattern, Emblem, Eye Glow, Reactor Glow, Repulsor Glow, Thrusters |
-| Effects | Glow Strength (5), Glow Pulse (4), Thruster Trail (8) |
+| Effects | Glow Strength (5), Glow Pulse (4), Thruster Trail (12) |
 | Systems | Repulsor Mode (6), Shoulder Weapon (6), Unibeam Mode (4), Armour Plating (5), Thrusters (5), Power Core (5) |
 
 The **Systems** options change how the suit plays:
@@ -71,11 +74,46 @@ The **Systems** options change how the suit plays:
 - **Thrusters**: Standard, Racing, Heavy-Lift, Hover (holds altitude when you let go), Afterburner.
 - **Power Core**: Balanced, Overclocked, Efficient, Regenerative, Unstable (damage, attack speed and regeneration trade-offs).
 
-The workshop has a live animated preview, the suit's stats for your current reactor, **Random Armour / Random Colours / Random Everything** buttons, **10 presets**, and **5 save slots** per character. Your design is saved with the character and synced to other players in multiplayer.
+The workshop has a live animated preview, the suit's stats for your current reactor, **Random Armour / Random Colours / Random Everything** buttons (they only pick parts you own), **17 presets** (one per premium set), and **5 save slots** per character. Your design is saved with the character and synced to other players in multiplayer.
+
+## Parts Store
+
+Open it with **P** or the workshop's **Parts Store** button. Pay with coins from your inventory, piggy bank, safe, Defender's Forge or Void Vault. Click anything to see it in the **try-on preview** before you buy, then **Equip** it.
+
+| Tab | What's in it | Price |
+| --- | --- | --- |
+| Premium Sets | 7 sets of 10 pieces each, with set bonuses (below) | per piece, or 15% off when you buy the rest of a set |
+| Armour | Helmets, faceplates, eyes, chests, reactors, shoulders, gauntlets, belts, legs, boots, back modules | 50 silver, going up 50 silver for each later option in a list (up to 8 gold) |
+| Paint & Effects | Patterns, emblems, finishes, thruster trails | 50 silver - 7 gold; trails 1 gold; premium finishes and trails below |
+| Systems | Repulsor, shoulder weapon and Unibeam modes, plating, thrusters, power cores | 5 gold each |
+
+Premium extras: **Obsidian** finish (8g, after the Wall of Flesh), **Radiant** finish (20g, after Plantera), and the **Blood** (5g, Hardmode), **Holy Light** and **Frost** (10g, after a mechanical boss) and **Void** (20g, after the Lunatic Cultist) thruster trails.
+
+### Premium sets
+
+![The seven premium sets](docs/sets.png)
+
+*Vampiric, Infernal, Titan, Cryo, Storm, Void and Godly, each shown with its preset colours.*
+
+Each set has a helmet, faceplate, eyes, chest, arc reactor, shoulders, gauntlets, legs, boots and back module. Wear **all 10 pieces while suited up** to get the set bonus. The Belt, colours and Systems options don't matter for the set bonus. The workshop shows how many pieces of the closest set you're wearing.
+
+| Set | Unlocks after | Price per piece (whole set) | Set bonus |
+| --- | --- | --- | --- |
+| **Vampiric** | Wall of Flesh | 6g (51g) | +10% damage (+20% at night). Hits heal you for 8% of damage dealt (1-12 HP). Immune to Bleeding. |
+| **Infernal** | Wall of Flesh | 6g (51g) | +15% damage. Immune to fire and lava. Hits inflict Hellfire. |
+| **Titan** | Any mechanical boss | 12g (1p 2g) | +40 defense, +8% damage reduction, no knockback, 50% thorns. 10% slower. |
+| **Cryo** | Plantera | 15g (1p 27g 50s) | +15% crit. Immune to Chilled, Frozen and Frostburn. Hits inflict Frostbite. |
+| **Storm** | Golem | 20g (1p 70g) | +25% move and flight speed. 25% of hits arc lightning to another enemy for half damage. |
+| **Void** | Lunatic Cultist | 30g (2p 55g) | +20% damage. 12% chance to phase through an attack. Immune to Darkness, Blackout and Obstructed. |
+| **Godly** | Moon Lord | 50g (4p 25g) | +30% damage, +10% crit, +30 defense, +10% damage reduction, +8 HP/s regen, +30% flight speed. Immune to most debuffs. 10% of hits call down holy light (a damaging blast). |
+
+The "whole set" price is for all 10 pieces. If you already own some pieces, you only pay for the rest.
+
+Characters created before the Parts Store existed keep every part they were already using or had saved in a slot.
 
 ### How the suit is drawn
 
-The suit isn't a fixed sprite sheet. `Common/Suits/SuitRenderer.cs` builds it from small ASCII pixel masks for each part (`Common/Suits/SuitParts.cs`). It adds patterns, emblem, finish shading and an outline, then caches the result as a texture. To add a new helmet, chest or other part, add a mask to `SuitParts.cs`. It shows up in the workshop automatically, and the option count updates too.
+The suit isn't a fixed sprite sheet. `Common/Suits/SuitRenderer.cs` builds it from small ASCII pixel masks for each part (`Common/Suits/SuitParts.cs`). It adds patterns, emblem, finish shading and an outline, then caches the result as a texture. To add a new helmet, chest or other part, add a mask to `SuitParts.cs`. It shows up in the workshop and the store automatically, and the option count updates too. New premium sets go in `Common/Suits/SuitSets.cs`, and prices are set in `Common/Suits/SuitShop.cs`.
 
 ## Installing from source
 

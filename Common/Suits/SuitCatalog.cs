@@ -91,7 +91,7 @@ namespace MarvelMod.Common.Suits
 		public static readonly SuitCategory GlowPulse = Add("glowPulse", "Glow Pulse", SuitGroup.Effects,
 			new[] { "Steady", "Slow Pulse", "Fast Pulse", "Flicker" });
 		public static readonly SuitCategory ThrusterTrail = Add("thrusterTrail", "Thruster Trail", SuitGroup.Effects,
-			new[] { "Flame", "Plasma", "Sparks", "Smoke", "Rainbow", "Ion", "Electric", "None" });
+			new[] { "Flame", "Plasma", "Sparks", "Smoke", "Rainbow", "Ion", "Electric", "None", "Blood", "Holy Light", "Frost", "Void" });
 
 		// Systems: these change how the suit plays (see SuitStats and the ability items).
 		public static readonly SuitCategory RepulsorMode = Add("repulsorMode", "Repulsor Mode", SuitGroup.Systems,

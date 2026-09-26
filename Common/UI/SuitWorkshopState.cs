@@ -56,6 +56,11 @@ namespace MarvelMod.Common.UI
 			summary.Top.Set(38f, 0f);
 			root.Append(summary);
 
+			statusText = new UIText("", 0.85f);
+			statusText.Left.Set(OptionsLeft - 60f, 0f);
+			statusText.Top.Set(8f, 0f);
+			root.Append(statusText);
+
 			BuildCategoryList();
 			BuildPreview();
 			BuildOptionArea();
@@ -179,10 +184,11 @@ namespace MarvelMod.Common.UI
 			Add(slotButton, 150f, row2);
 			Add(new WorkshopButton("Save Design", SaveSlot), 150f, row2);
 			Add(new WorkshopButton("Load Design", LoadSlot), 150f, row2);
-			statusText = new UIText("", 0.8f);
-			statusText.Left.Set(x + 10f, 0f);
-			statusText.Top.Set(row2 + 10f, 1f);
-			root.Append(statusText);
+			var storeButton = new WorkshopButton("Parts Store", SuitWorkshopSystem.OpenStore);
+			storeButton.Left.Set(-236f, 1f);
+			storeButton.Top.Set(row2, 1f);
+			storeButton.Width.Set(130f, 0f);
+			root.Append(storeButton);
 
 			var close = new WorkshopButton("Close", SuitWorkshopSystem.Close);
 			close.Left.Set(-100f, 1f);
@@ -211,7 +217,8 @@ namespace MarvelMod.Common.UI
 			else {
 				for (int i = 0; i < category.Count; i++) {
 					int index = i;
-					var button = FullWidth(new WorkshopButton(category.OptionName(i), () => SetOption(index)));
+					var button = FullWidth(new WorkshopButton(OptionLabel(category, i), () => SetOption(index)));
+					button.Locked = !ModPlayer.Owns(category, i);
 					optionButtons.Add(button);
 					optionList.Add(button);
 				}
@@ -221,17 +228,42 @@ namespace MarvelMod.Common.UI
 			UpdateLabels();
 		}
 
+		private static string OptionLabel(SuitCategory category, int index) {
+			ShopItem item = SuitShop.Get(category, index);
+			string name = category.OptionName(index);
+			if (item?.Set != null) {
+				name += $" [c/FFD700:({item.Set.Name})]";
+			}
+			if (ModPlayer.Owns(category, index)) {
+				return name;
+			}
+			return $"{name}  [c/909090:locked - {SuitShop.FormatPrice(item.Price)}]";
+		}
+
 		private void SetOption(int index) {
+			if (!ModPlayer.Owns(selected, index)) {
+				ShopItem item = SuitShop.Get(selected, index);
+				statusText.SetText($"Locked: {SuitShop.FormatPrice(item.Price)} in the Parts Store");
+				return;
+			}
 			Suit[selected] = index;
 			UpdateLabels();
 		}
 
+		// Moves to the next or previous option the player owns.
 		private void Step(int direction) {
-			SetOption((Suit[selected] + direction + selected.Count) % selected.Count);
+			int index = Suit[selected];
+			for (int i = 0; i < selected.Count; i++) {
+				index = (index + direction + selected.Count) % selected.Count;
+				if (ModPlayer.Owns(selected, index)) {
+					SetOption(index);
+					return;
+				}
+			}
 		}
 
 		private void Randomise(params SuitGroup[] groups) {
-			Suit.Randomise(random, groups);
+			Suit.Randomise(random, ModPlayer.Owns, groups);
 			UpdateLabels();
 		}
 
@@ -241,7 +273,13 @@ namespace MarvelMod.Common.UI
 		}
 
 		private void ApplyPreset() {
-			SuitPresets.All[presetIndex].Build().CopyTo(Suit);
+			SuitConfig preset = SuitPresets.All[presetIndex].Build();
+			int missing = ModPlayer.MissingParts(preset).Count;
+			if (missing > 0) {
+				statusText.SetText($"Preset needs {missing} part{(missing == 1 ? "" : "s")} you don't own (Parts Store)");
+				return;
+			}
+			preset.CopyTo(Suit);
 			statusText.SetText($"Loaded preset: {SuitPresets.All[presetIndex].Name}");
 			UpdateLabels();
 		}
@@ -283,11 +321,28 @@ namespace MarvelMod.Common.UI
 
 			int tier = Math.Max(1, ModPlayer.ReactorTier);
 			string reactor = ModPlayer.ReactorTier > 0 ? $"Mk {tier} reactor" : "Mk 1 reactor (none equipped)";
-			statsText.SetText($"Suit stats with a {reactor}:\n{SuitStats.For(Suit, tier)}");
+			statsText.SetText($"Suit stats with a {reactor}:\n{SuitStats.For(Suit, tier)}{SetProgress()}");
 
 			presetButton.SetText($"Preset: {SuitPresets.All[presetIndex].Name}");
 			bool empty = ModPlayer.SavedDesigns[slotIndex] == null;
 			slotButton.SetText($"Slot {slotIndex + 1}{(empty ? " (empty)" : "")}");
+		}
+
+		// "Vampiric set: 7/10 pieces" for the set the design is closest to completing.
+		private static string SetProgress() {
+			SuitSet best = null;
+			int bestWorn = 0;
+			foreach (SuitSet set in SuitSets.All) {
+				int worn = set.PiecesWorn(Suit);
+				if (worn > bestWorn) {
+					best = set;
+					bestWorn = worn;
+				}
+			}
+			if (best == null || bestWorn == best.PieceCount) {
+				return "";
+			}
+			return $"\n[c/FFD700:{best.Name} set: {bestWorn}/{best.PieceCount} pieces worn]";
 		}
 
 		public override void Update(GameTime gameTime) {

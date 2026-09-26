@@ -151,7 +151,7 @@ namespace MarvelMod.Common.Suits
 				right = (-1, 0);
 			}
 
-			DrawBack(c, config[SuitCatalog.Back]);
+			DrawBack(c, config.OptionName(SuitCatalog.Back));
 
 			c.Mask(SuitParts.Legs[config[SuitCatalog.Legs]].Mask, 8, 18, shift: col => col < 4 ? left : col > 4 ? right : (0, 0));
 			c.Mask(SuitParts.Boots[config[SuitCatalog.Boots]].Mask, 7, 24, shift: col => col < 5 ? left : col > 5 ? right : (0, 0));
@@ -187,19 +187,19 @@ namespace MarvelMod.Common.Suits
 			ApplyPattern(c, config[SuitCatalog.Pattern]);
 		}
 
-		private static void DrawBack(Canvas c, int style) {
+		private static void DrawBack(Canvas c, string style) {
 			switch (style) {
-				case 1: // Jetpack
+				case "Jetpack":
 					c.MirrorRect(2, 8, 3, 15, SuitRole.Secondary);
 					c.MirrorRect(2, 7, 3, 7, SuitRole.Trim);
 					c.MirrorRect(2, 16, 3, 16, SuitRole.Dark);
 					break;
-				case 2: // Flight Fins
+				case "Flight Fins":
 					c.MirrorRect(2, 5, 3, 6, SuitRole.Accent);
 					c.MirrorRect(1, 7, 3, 8, SuitRole.Accent);
 					c.MirrorRect(0, 9, 3, 10, SuitRole.Accent);
 					break;
-				case 3: // Wing Blades
+				case "Wing Blades":
 					for (int i = 0; i < 6; i++) {
 						c.MirrorRect(5 - i, 8 - i, 5 - i, 9 - i, SuitRole.Accent);
 					}
@@ -207,34 +207,81 @@ namespace MarvelMod.Common.Suits
 						c.MirrorRect(3 - i, 10 + i, 3 - i, 10 + i, SuitRole.Accent);
 					}
 					break;
-				case 4: // Twin Tanks
+				case "Twin Tanks":
 					c.MirrorRect(5, 3, 6, 8, SuitRole.Secondary);
 					c.MirrorRect(5, 2, 6, 2, SuitRole.Trim);
 					break;
-				case 5: // Missile Pods
+				case "Missile Pods":
 					c.MirrorRect(4, 5, 7, 8, SuitRole.Secondary);
 					c.MirrorRect(4, 5, 4, 5, SuitRole.Accent);
 					c.MirrorRect(6, 5, 6, 5, SuitRole.Accent);
 					c.MirrorRect(4, 6, 7, 6, SuitRole.Dark);
 					break;
-				case 6: // Antennae
+				case "Antennae":
 					c.MirrorRect(6, 1, 6, 8, SuitRole.Trim);
 					c.MirrorRect(6, 0, 6, 0, SuitRole.Accent);
 					break;
-				case 7: // Power Pack
+				case "Power Pack":
 					c.Rect(4, 6, 20, 8, SuitRole.Secondary);
 					c.MirrorRect(5, 7, 6, 7, SuitRole.Reactor);
 					break;
-				case 8: // Radiator Fins
+				case "Radiator Fins":
 					for (int i = 0; i < 5; i++) {
 						c.MirrorRect(1, 6 + 2 * i, 3, 6 + 2 * i, SuitRole.Trim);
 					}
 					break;
-				case 9: // Rocket Boosters
+				case "Rocket Boosters":
 					c.MirrorRect(1, 5, 3, 15, SuitRole.Secondary);
 					c.MirrorRect(1, 4, 3, 4, SuitRole.Accent);
 					c.MirrorRect(2, 3, 2, 3, SuitRole.Accent);
 					c.MirrorRect(1, 16, 3, 16, SuitRole.Thruster);
+					break;
+
+				// Premium set backs
+				case "Bat Wings":
+					c.MirrorRect(1, 4, 5, 4, SuitRole.Accent);
+					c.MirrorRect(0, 5, 3, 11, SuitRole.Undersuit);
+					c.MirrorRect(0, 5, 0, 11, SuitRole.Accent);
+					c.MirrorRect(2, 5, 2, 10, SuitRole.Accent);
+					c.MirrorRect(1, 11, 1, 11, SuitRole.None); // scalloped edge
+					break;
+				case "Flame Wings":
+					c.MirrorRect(3, 3, 3, 5, SuitRole.Thruster);
+					c.MirrorRect(2, 5, 3, 8, SuitRole.Thruster);
+					c.MirrorRect(1, 7, 3, 10, SuitRole.Thruster);
+					c.MirrorRect(0, 9, 3, 12, SuitRole.Thruster);
+					c.MirrorRect(1, 2, 1, 4, SuitRole.Thruster);
+					break;
+				case "Reactor Stacks":
+					c.MirrorRect(2, 2, 4, 2, SuitRole.Trim);
+					c.MirrorRect(2, 3, 4, 14, SuitRole.Secondary);
+					c.MirrorRect(3, 4, 3, 12, SuitRole.Reactor);
+					break;
+				case "Crystal Shards":
+					c.MirrorRect(3, 2, 3, 7, SuitRole.Accent);
+					c.MirrorRect(1, 4, 1, 9, SuitRole.Accent);
+					c.MirrorRect(2, 6, 2, 11, SuitRole.Accent);
+					c.MirrorRect(0, 8, 0, 12, SuitRole.Accent);
+					break;
+				case "Tesla Array":
+					c.MirrorRect(4, 1, 4, 8, SuitRole.Trim);
+					c.MirrorRect(4, 0, 4, 0, SuitRole.Repulsor);
+					c.MirrorRect(2, 4, 2, 10, SuitRole.Trim);
+					c.MirrorRect(2, 3, 2, 3, SuitRole.Repulsor);
+					c.MirrorRect(2, 6, 4, 6, SuitRole.Trim);
+					break;
+				case "Void Tendrils":
+					int[] xs = { 4, 3, 3, 2, 2, 1, 1, 0, 0, 1 };
+					for (int i = 0; i < xs.Length; i++) {
+						c.MirrorRect(xs[i], 3 + i, xs[i], 3 + i, i % 3 == 2 ? SuitRole.Eye : SuitRole.Dark);
+					}
+					break;
+				case "Angel Wings":
+					c.MirrorRect(0, 3, 3, 4, SuitRole.Accent);
+					c.MirrorRect(0, 5, 4, 6, SuitRole.Secondary);
+					c.MirrorRect(0, 7, 3, 8, SuitRole.Secondary);
+					c.MirrorRect(1, 9, 3, 10, SuitRole.Secondary);
+					c.MirrorRect(2, 11, 3, 12, SuitRole.Secondary);
 					break;
 			}
 		}
@@ -302,13 +349,15 @@ namespace MarvelMod.Common.Suits
 		// Colours every pixel of one frame: armour gets edge lighting based on the finish, glow roles go to the glow layer,
 		// and a dark outline is drawn around the whole silhouette.
 		private static void Resolve(SuitConfig config, Canvas c, int frameIndex, Color[] body, Color[] glow) {
-			int finish = config[SuitCatalog.Finish];
+			string finish = config.OptionName(SuitCatalog.Finish);
 			(float highlight, float shadow) = finish switch {
-				1 => (0.10f, 0.15f), // Matte
-				2 => (0.55f, 0.45f), // Chrome
-				3 => (0.40f, 0.20f), // Gloss
-				4 => (0.10f, 0.20f), // Stealth
-				_ => (0.30f, 0.30f)  // Metallic, Battle-Damaged
+				"Matte" => (0.10f, 0.15f),
+				"Chrome" => (0.55f, 0.45f),
+				"Gloss" => (0.40f, 0.20f),
+				"Stealth" => (0.10f, 0.20f),
+				"Obsidian" => (0.35f, 0.25f),
+				"Radiant" => (0.65f, 0.10f),
+				_ => (0.30f, 0.30f) // Metallic, Battle-Damaged
 			};
 			Color outline = Shade(config.Colour(SuitCatalog.PrimaryColour), -0.82f);
 			int sheetWidth = SheetWidth;
@@ -336,23 +385,29 @@ namespace MarvelMod.Common.Suits
 						continue;
 					}
 
-					if (finish == 4) {
+					if (finish == "Stealth") {
 						colour = Shade(Desaturate(colour, 0.5f), -0.45f);
+					}
+					else if (finish == "Obsidian") {
+						colour = Shade(Desaturate(colour, 0.3f), -0.6f);
+					}
+					else if (finish == "Radiant") {
+						colour = Shade(colour, 0.15f);
 					}
 
 					bool lit = c.Get(x, y - 1) == SuitRole.None || c.Get(x - 1, y) == SuitRole.None;
 					bool shaded = c.Get(x, y + 1) == SuitRole.None || c.Get(x + 1, y) == SuitRole.None;
 					float amount = (lit ? highlight : 0f) - (shaded ? shadow : 0f);
 
-					if (finish == 2 && (x + y) % 4 == 0) {
+					if (finish == "Chrome" && (x + y) % 4 == 0) {
 						amount += 0.2f; // chrome banding
 					}
-					if (finish == 3 && lit && c.Get(x - 1, y) == SuitRole.None && c.Get(x, y - 1) == SuitRole.None) {
+					if ((finish == "Gloss" || finish == "Obsidian") && lit && c.Get(x - 1, y) == SuitRole.None && c.Get(x, y - 1) == SuitRole.None) {
 						amount = 0.75f; // gloss specular corner
 					}
 					colour = Shade(colour, Math.Clamp(amount, -0.9f, 0.9f));
 
-					if (finish == 5) {
+					if (finish == "Battle-Damaged") {
 						int h = Hash(x, y);
 						if (h % 9 == 0) {
 							colour = Shade(colour, -0.5f); // scorch marks

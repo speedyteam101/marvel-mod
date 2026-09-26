@@ -16,6 +16,7 @@ namespace MarvelMod.Common.Suits
 		public float FlightAcceleration;
 		public bool Hover;          // hold altitude when no direction is held
 		public bool NoKnockback;
+		public SuitSet Set;         // premium set whose bonus is active, if any
 
 		public static SuitStats For(SuitConfig config, int tier) {
 			tier = System.Math.Clamp(tier, 1, 3);
@@ -95,6 +96,38 @@ namespace MarvelMod.Common.Suits
 					break;
 			}
 
+			stats.Set = SuitSets.WornBy(config);
+			if (stats.Set == SuitSets.Vampiric) {
+				stats.Damage += Main.dayTime ? 10 : 20;
+			}
+			else if (stats.Set == SuitSets.Infernal) {
+				stats.Damage += 15;
+			}
+			else if (stats.Set == SuitSets.Titan) {
+				defense += 40;
+				stats.DamageReduction += 8;
+				stats.NoKnockback = true;
+				stats.MoveSpeed -= 10;
+			}
+			else if (stats.Set == SuitSets.Cryo) {
+				stats.Crit += 15;
+			}
+			else if (stats.Set == SuitSets.Storm) {
+				stats.MoveSpeed += 25;
+				stats.FlightSpeed *= 1.25f;
+			}
+			else if (stats.Set == SuitSets.Void) {
+				stats.Damage += 20;
+			}
+			else if (stats.Set == SuitSets.Godly) {
+				stats.Damage += 30;
+				stats.Crit += 10;
+				defense += 30;
+				stats.DamageReduction += 10;
+				stats.LifeRegen += 8;
+				stats.FlightSpeed *= 1.3f;
+			}
+
 			stats.Defense = (int)defense;
 			stats.LifeRegen = System.Math.Max(0, stats.LifeRegen);
 			stats.DamageReduction = System.Math.Max(0, stats.DamageReduction);
@@ -118,7 +151,8 @@ namespace MarvelMod.Common.Suits
 				+ $"+{Damage}% damage, +{Crit}% crit\n"
 				+ $"+{AttackSpeed}% attack speed, +{MoveSpeed}% move speed\n"
 				+ $"{LifeRegen} HP/s regen, flight speed {FlightSpeed:0.#}\n"
-				+ (Hover ? "Hovers in place" : "No hover") + (NoKnockback ? ", no knockback" : "");
+				+ (Hover ? "Hovers in place" : "No hover") + (NoKnockback ? ", no knockback" : "")
+				+ (Set != null ? $"\n[c/FFD700:{Set.Name} set bonus active]" : "");
 		}
 	}
 }

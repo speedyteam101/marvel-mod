@@ -31,11 +31,20 @@ namespace MarvelMod.Common.Suits
 
 		public bool SameAs(SuitConfig other) => other != null && Values.AsSpan().SequenceEqual(other.Values);
 
-		// Randomises the chosen groups. Systems are left alone by default because they change gameplay.
-		public void Randomise(Random random, params SuitGroup[] groups) {
+		// Randomises the chosen groups, only picking options that allowed(category, index) accepts.
+		public void Randomise(Random random, Func<SuitCategory, int, bool> allowed, params SuitGroup[] groups) {
 			foreach (SuitCategory category in SuitCatalog.All) {
-				if (Array.IndexOf(groups, category.Group) >= 0) {
-					this[category] = random.Next(category.Count);
+				if (Array.IndexOf(groups, category.Group) < 0) {
+					continue;
+				}
+				var choices = new System.Collections.Generic.List<int>();
+				for (int i = 0; i < category.Count; i++) {
+					if (allowed(category, i)) {
+						choices.Add(i);
+					}
+				}
+				if (choices.Count > 0) {
+					this[category] = choices[random.Next(choices.Count)];
 				}
 			}
 		}

@@ -22,6 +22,10 @@ namespace MarvelMod
 			packet.Send(toWho, fromWho);
 		}
 
+		public override void Unload() {
+			Common.Suits.SuitShop.Unload();
+		}
+
 		public override void HandlePacket(BinaryReader reader, int whoAmI) {
 			switch ((PacketType)reader.ReadByte()) {
 				case PacketType.SyncSuit:
