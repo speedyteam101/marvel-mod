@@ -14,6 +14,7 @@ namespace MarvelMod.Common.Suits
 		Dark,
 		Pattern,
 		Emblem,
+		Weapon,
 		// Glowing roles: drawn unlit on the glow layer.
 		Eye,
 		Reactor,
@@ -201,6 +202,8 @@ namespace MarvelMod.Common.Suits
 			}
 
 			DrawBack(c, config.OptionName(SuitCatalog.Back));
+			DrawStowedWeapon(c, SuitWeapons.All[config[SuitCatalog.WeaponSlot1]].Stowed, false);
+			DrawStowedWeapon(c, SuitWeapons.All[config[SuitCatalog.WeaponSlot2]].Stowed, true);
 
 			string[] legs = SuitParts.Legs[config[SuitCatalog.Legs]].Mask;
 			string[] boots = SuitParts.Boots[config[SuitCatalog.Boots]].Mask;
@@ -242,6 +245,18 @@ namespace MarvelMod.Common.Suits
 				c.Mask(gauntlet, 10 + swing, 14, colStart: 0, colEnd: 3, reverse: true);
 			}
 
+			// Wrist-mounted blades stick out of the near gauntlet.
+			bool wristBlade = SuitWeapons.All[config[SuitCatalog.WeaponSlot1]].Stowed == StowedShape.WristBlade
+				|| SuitWeapons.All[config[SuitCatalog.WeaponSlot2]].Stowed == StowedShape.WristBlade;
+			if (wristBlade) {
+				if (aiming) {
+					c.Rect(20, 9, 23, 9, SuitRole.Weapon);
+				}
+				else {
+					c.Rect(13 + swing, 16, 13 + swing, 19, SuitRole.Weapon);
+				}
+			}
+
 			// Shoulder pad, with the emblem painted on it.
 			c.Mask(SuitParts.Shoulders[config[SuitCatalog.Shoulders]].Mask, 10, 9, reverse: true);
 			c.Mask(SuitParts.Emblems[config[SuitCatalog.Emblem]].Mask, 10, 9, colStart: 1, colEnd: 3, overlay: true);
@@ -252,6 +267,81 @@ namespace MarvelMod.Common.Suits
 			c.Mask(SuitParts.Eyes[config[SuitCatalog.Eyes]].Mask, 14, 5, colStart: 4, colEnd: 6, overlay: true);
 
 			ApplyPattern(c, config[SuitCatalog.Pattern]);
+		}
+
+		// Attached weapons are carried on the back, crossed: slot I points down to the left, slot II up to the left.
+		// Wrist-mounted ones are drawn on the gauntlet instead (see DrawFrame).
+		private static void DrawStowedWeapon(Canvas c, StowedShape shape, bool second) {
+			if (shape is StowedShape.None or StowedShape.WristBlade) {
+				return;
+			}
+			// Line from the tip end to the handle end.
+			(int x0, int y0, int x1, int y1) = second ? (4, 5, 10, 16) : (4, 19, 10, 7);
+			int length = Math.Max(Math.Abs(x1 - x0), Math.Abs(y1 - y0));
+			void Point(int i, int dx, int dy, SuitRole role) {
+				int x = x0 + (x1 - x0) * i / length;
+				int y = y0 + (y1 - y0) * i / length;
+				c.Set(x + dx, y + dy, role);
+			}
+			int dir = second ? 1 : -1; // which way "up the blade" goes vertically, for heads
+
+			switch (shape) {
+				case StowedShape.Shield:
+					c.Rect(4, 9, 8, 17, SuitRole.Weapon);
+					c.Rect(5, 10, 7, 16, SuitRole.Trim);
+					c.Rect(6, 12, 6, 14, SuitRole.Weapon);
+					return;
+				case StowedShape.Disc:
+					int cy = second ? 7 : 16;
+					c.Rect(4, cy - 1, 6, cy + 1, SuitRole.Weapon);
+					c.Set(5, cy, SuitRole.Dark);
+					c.Set(3, cy, SuitRole.Weapon);
+					c.Set(7, cy, SuitRole.Weapon);
+					c.Set(5, cy - 2, SuitRole.Weapon);
+					c.Set(5, cy + 2, SuitRole.Weapon);
+					return;
+				case StowedShape.Coil:
+					for (int i = 0; i < 5; i++) {
+						c.Rect(5, (second ? 5 : 12) + i, 7, (second ? 5 : 12) + i, i % 2 == 0 ? SuitRole.Weapon : SuitRole.Repulsor);
+					}
+					return;
+			}
+
+			for (int i = 0; i <= length; i++) {
+				bool handle = i >= length - 2;
+				SuitRole role = handle ? SuitRole.Dark : SuitRole.Weapon;
+				Point(i, 0, 0, role);
+				bool thick = shape is StowedShape.LongBarrel or StowedShape.Barrel || (shape == StowedShape.Blade && !handle);
+				if (thick) {
+					Point(i, 1, 0, role);
+				}
+			}
+			switch (shape) {
+				case StowedShape.Axe:
+					Point(1, -1, 0, SuitRole.Weapon); Point(2, -1, 0, SuitRole.Weapon); Point(1, -2, 0, SuitRole.Weapon);
+					Point(2, -2, 0, SuitRole.Weapon); Point(3, -1, 0, SuitRole.Weapon);
+					break;
+				case StowedShape.Scythe:
+					Point(0, 1, 0, SuitRole.Weapon); Point(0, 2, 0, SuitRole.Weapon); Point(0, 3, dir, SuitRole.Weapon); Point(0, 4, dir, SuitRole.Weapon);
+					break;
+				case StowedShape.Hammer:
+					Point(0, -1, 0, SuitRole.Weapon); Point(0, 1, 0, SuitRole.Weapon); Point(1, -1, 0, SuitRole.Weapon);
+					Point(1, 1, 0, SuitRole.Weapon); Point(0, -2, 0, SuitRole.Weapon); Point(1, -2, 0, SuitRole.Weapon);
+					break;
+				case StowedShape.Spear:
+					Point(0, 0, 0, SuitRole.Repulsor);
+					break;
+				case StowedShape.Katana:
+					Point(length - 3, -1, 0, SuitRole.Trim); Point(length - 3, 1, 0, SuitRole.Trim); // guard
+					break;
+				case StowedShape.LongBarrel:
+					Point(0, 0, 0, SuitRole.Repulsor);
+					Point(length / 2, 2, 0, SuitRole.Dark);
+					break;
+				case StowedShape.Barrel:
+					Point(0, 0, 0, SuitRole.Repulsor);
+					break;
+			}
 		}
 
 		private static void DrawBack(Canvas c, string style) {
@@ -406,6 +496,7 @@ namespace MarvelMod.Common.Suits
 			SuitRole.Dark => Shade(config.Colour(SuitCatalog.PrimaryColour), -0.7f),
 			SuitRole.Pattern => config.Colour(SuitCatalog.PatternColour),
 			SuitRole.Emblem => config.Colour(SuitCatalog.EmblemColour),
+			SuitRole.Weapon => config.Colour(SuitCatalog.WeaponColour),
 			SuitRole.Eye => config.Colour(SuitCatalog.EyeColour),
 			SuitRole.Reactor => config.Colour(SuitCatalog.ReactorColour),
 			SuitRole.Repulsor => config.Colour(SuitCatalog.RepulsorColour),

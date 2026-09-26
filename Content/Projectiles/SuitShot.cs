@@ -20,17 +20,22 @@ namespace MarvelMod.Content.Projectiles
 		Laser,
 		Rocket,
 		ClusterBomb,
-		Bomblet
+		Bomblet,
+		Flame,
+		Plasma,
+		Grenade
 	}
 
-	// Every suit projectile except the Unibeam. ai[0] is the ShotKind; ai[1] = 1 makes a repulsor piercing.
+	// Every suit projectile except the Unibeam and melee weapons. ai[0] is the ShotKind; ai[1] = 1 makes a repulsor piercing.
+	// ai[2] counts grenade bounces.
 	public class SuitShot : ModProjectile
 	{
 		private ShotKind Kind => (ShotKind)(int)Projectile.ai[0];
 
-		private bool Explosive => Kind is ShotKind.HeavyRepulsor or ShotKind.Missile or ShotKind.Rocket or ShotKind.ClusterBomb or ShotKind.Bomblet;
+		private bool Explosive => Kind is ShotKind.HeavyRepulsor or ShotKind.Missile or ShotKind.Rocket or ShotKind.ClusterBomb
+			or ShotKind.Bomblet or ShotKind.Plasma or ShotKind.Grenade;
 
-		private bool HasGravity => Kind is ShotKind.Flare or ShotKind.ClusterBomb or ShotKind.Bomblet;
+		private bool HasGravity => Kind is ShotKind.Flare or ShotKind.ClusterBomb or ShotKind.Bomblet or ShotKind.Grenade;
 
 		public override void SetDefaults() {
 			Projectile.width = 12;
@@ -89,6 +94,20 @@ namespace MarvelMod.Content.Projectiles
 					Projectile.Resize(8, 8);
 					Projectile.timeLeft = 90;
 					break;
+				case ShotKind.Flame:
+					Projectile.Resize(16, 16);
+					Projectile.timeLeft = 35;
+					Projectile.penetrate = 4;
+					Projectile.localNPCHitCooldown = 10;
+					break;
+				case ShotKind.Plasma:
+					Projectile.Resize(24, 24);
+					Projectile.timeLeft = 120;
+					break;
+				case ShotKind.Grenade:
+					Projectile.Resize(12, 12);
+					Projectile.timeLeft = 100;
+					break;
 			}
 		}
 
@@ -97,6 +116,8 @@ namespace MarvelMod.Content.Projectiles
 			return Kind switch {
 				ShotKind.Bullet => new Color(255, 220, 120),
 				ShotKind.Flare => suit.Colour(SuitCatalog.ThrusterColour),
+				ShotKind.Flame => new Color(255, 140, 40),
+				ShotKind.Grenade => suit.Colour(SuitCatalog.WeaponColour),
 				_ => suit.Colour(SuitCatalog.RepulsorColour)
 			};
 		}
@@ -133,6 +154,17 @@ namespace MarvelMod.Content.Projectiles
 					}
 					SmokeTrail();
 					break;
+				case ShotKind.Flame:
+					Projectile.velocity *= 0.96f;
+					if (Main.rand.NextBool(2)) {
+						Dust flame = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, DustID.Torch, 0f, 0f, 0, default, 1.6f);
+						flame.noGravity = true;
+					}
+					break;
+				case ShotKind.Plasma:
+					Dust plasma = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, DustID.TintableDustLighted, 0f, 0f, 0, ShotColour(), 1.1f);
+					plasma.noGravity = true;
+					break;
 				case ShotKind.Flare:
 					if (Main.rand.NextBool(2)) {
 						Dust dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, DustID.Torch);
@@ -167,9 +199,25 @@ namespace MarvelMod.Content.Projectiles
 		}
 
 		public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
-			if (Kind == ShotKind.Flare) {
+			if (Kind is ShotKind.Flare or ShotKind.Flame) {
 				target.AddBuff(BuffID.OnFire3, 240);
 			}
+		}
+
+		// Grenades bounce twice before exploding; everything else stops at walls.
+		public override bool OnTileCollide(Vector2 oldVelocity) {
+			if (Kind != ShotKind.Grenade || Projectile.ai[2] >= 2f) {
+				return true;
+			}
+			Projectile.ai[2]++;
+			if (Projectile.velocity.X != oldVelocity.X) {
+				Projectile.velocity.X = -oldVelocity.X * 0.6f;
+			}
+			if (Projectile.velocity.Y != oldVelocity.Y) {
+				Projectile.velocity.Y = -oldVelocity.Y * 0.6f;
+			}
+			SoundEngine.PlaySound(SoundID.Dig, Projectile.Center);
+			return false;
 		}
 
 		public override void OnKill(int timeLeft) {
@@ -178,6 +226,8 @@ namespace MarvelMod.Content.Projectiles
 				if (Projectile.owner == Main.myPlayer) {
 					int size = Kind switch {
 						ShotKind.Rocket => 150,
+						ShotKind.Plasma => 160,
+						ShotKind.Grenade => 90,
 						ShotKind.HeavyRepulsor => 90,
 						ShotKind.Missile => 60,
 						_ => 50
@@ -207,9 +257,9 @@ namespace MarvelMod.Content.Projectiles
 		public override bool PreDraw(ref Color lightColor) {
 			Vector2 position = Projectile.Center - Main.screenPosition;
 
-			if (Kind is ShotKind.Missile or ShotKind.Rocket or ShotKind.ClusterBomb or ShotKind.Bomblet) {
+			if (Kind is ShotKind.Missile or ShotKind.Rocket or ShotKind.ClusterBomb or ShotKind.Bomblet or ShotKind.Grenade) {
 				Texture2D missile = ModContent.Request<Texture2D>("MarvelMod/Content/Projectiles/SuitMissile").Value;
-				float scale = Kind switch { ShotKind.Rocket => 1.4f, ShotKind.Bomblet => 0.7f, _ => 1f };
+				float scale = Kind switch { ShotKind.Rocket => 1.4f, ShotKind.Bomblet or ShotKind.Grenade => 0.7f, _ => 1f };
 				Main.EntitySpriteDraw(missile, position, null, lightColor, Projectile.rotation + MathHelper.PiOver2,
 					missile.Size() / 2f, scale, SpriteEffects.None, 0);
 				return false;
@@ -223,6 +273,8 @@ namespace MarvelMod.Content.Projectiles
 				ShotKind.Laser => new Vector2(3.5f, 0.45f),
 				ShotKind.Bullet => new Vector2(2f, 0.35f),
 				ShotKind.Flare => new Vector2(1f, 1f),
+				ShotKind.Flame => new Vector2(1.2f, 1.2f) * (1.8f - Projectile.timeLeft / 35f),
+				ShotKind.Plasma => new Vector2(2.8f, 2.4f),
 				_ => new Vector2(1.8f, 1f)
 			};
 			Main.EntitySpriteDraw(orb, position, null, colour, Projectile.rotation, orb.Size() / 2f, stretch, SpriteEffects.None, 0);

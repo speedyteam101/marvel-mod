@@ -157,7 +157,154 @@ def suit_missile():
     save(img, "Content/Projectiles/SuitMissile.png")
 
 
+# Attached weapons. Drawn in light greys pointing straight up with the grip at the bottom,
+# because the game tints them with the suit's Weapon Colour and rotates them.
+W_LIGHT = (245, 245, 245, 255)
+W_MID = (200, 200, 205, 255)
+W_DARK = (130, 130, 138, 255)
+W_GRIP = (70, 70, 78, 255)
+
+
+def weapon(name, w, h, draw):
+    img, d = canvas(w, h)
+    draw(d, w, h)
+    save(img, f"Content/Weapons/{name}.png")
+
+
+def energy_sword(d, w, h):  # 6x28
+    d.rectangle([1, 0, 4, 20], fill=OUTLINE)
+    d.rectangle([2, 1, 3, 20], fill=W_LIGHT)
+    d.point((2, 0), fill=W_LIGHT)
+    d.rectangle([0, 21, 5, 22], fill=W_DARK)   # guard
+    d.rectangle([2, 23, 3, 27], fill=W_GRIP)
+
+
+def katana(d, w, h):  # 5x32
+    d.line([2, 0, 2, 22], fill=W_LIGHT)
+    d.line([3, 1, 3, 22], fill=W_MID)
+    d.line([1, 2, 1, 22], fill=OUTLINE)
+    d.rectangle([0, 23, 4, 23], fill=W_DARK)   # tsuba
+    d.rectangle([2, 24, 3, 31], fill=W_GRIP)
+    for y in range(25, 31, 2):
+        d.point((2, y), fill=W_DARK)
+
+
+def battle_axe(d, w, h):  # 14x30
+    d.rectangle([6, 2, 7, 29], fill=W_GRIP)
+    d.polygon([(7, 1), (13, 0), (13, 11), (7, 9)], fill=W_MID)
+    d.line([13, 0, 13, 11], fill=W_LIGHT)
+    d.polygon([(6, 3), (2, 2), (2, 7), (6, 7)], fill=W_DARK)
+
+
+def warhammer(d, w, h):  # 14x30
+    d.rectangle([6, 8, 7, 29], fill=W_GRIP)
+    d.rectangle([0, 0, 13, 8], fill=OUTLINE)
+    d.rectangle([1, 1, 12, 7], fill=W_MID)
+    d.rectangle([1, 1, 12, 2], fill=W_LIGHT)
+    d.rectangle([5, 3, 8, 5], fill=W_DARK)
+
+
+def reaper_scythe(d, w, h):  # 18x34
+    d.rectangle([8, 3, 9, 33], fill=W_GRIP)
+    d.polygon([(9, 1), (17, 3), (17, 6), (13, 4), (9, 5)], fill=W_LIGHT)
+    d.line([0, 9, 4, 5], fill=W_MID)
+    d.polygon([(8, 2), (2, 3), (0, 8), (3, 6), (8, 5)], fill=W_MID)
+    d.line([0, 8, 2, 3], fill=W_LIGHT)
+
+
+def throwing_spear(d, w, h):  # 5x36
+    d.polygon([(2, 0), (4, 5), (2, 8), (0, 5)], fill=W_LIGHT)
+    d.rectangle([2, 8, 2, 35], fill=W_GRIP)
+    d.point((1, 9), fill=W_DARK); d.point((3, 9), fill=W_DARK)
+
+
+def energy_lance(d, w, h):  # 7x40
+    d.polygon([(3, 0), (6, 14), (3, 18), (0, 14)], fill=W_LIGHT)
+    d.line([3, 2, 3, 16], fill=W_MID)
+    d.rectangle([0, 19, 6, 20], fill=W_DARK)
+    d.rectangle([2, 21, 4, 39], fill=W_GRIP)
+
+
+def wrist_blade(d, w, h):  # 4x16
+    d.polygon([(1, 0), (3, 3), (3, 11), (0, 11), (0, 2)], fill=W_LIGHT)
+    d.line([3, 3, 3, 11], fill=W_MID)
+    d.rectangle([0, 12, 3, 15], fill=W_GRIP)
+
+
+def railgun(d, w, h):  # 10x42
+    d.rectangle([3, 0, 6, 30], fill=OUTLINE)
+    d.rectangle([4, 0, 5, 30], fill=W_MID)
+    d.rectangle([2, 4, 7, 5], fill=W_DARK)     # rail rings
+    d.rectangle([2, 12, 7, 13], fill=W_DARK)
+    d.rectangle([2, 20, 7, 21], fill=W_DARK)
+    d.rectangle([1, 26, 8, 36], fill=W_DARK)   # body
+    d.rectangle([2, 27, 7, 35], fill=W_MID)
+    d.rectangle([3, 28, 6, 29], fill=CYAN)
+    d.rectangle([4, 37, 6, 41], fill=W_GRIP)   # stock
+
+
+def disc(d, w, h, teeth):  # 14x14
+    d.ellipse([0, 0, 13, 13], fill=W_MID)
+    d.ellipse([1, 1, 12, 12], fill=W_LIGHT)
+    d.ellipse([4, 4, 9, 9], fill=W_DARK)
+    d.ellipse([5, 5, 8, 8], fill=CLEAR)
+    for x, y in teeth:
+        d.point((x, y), fill=W_LIGHT)
+
+
+def chakram(d, w, h):
+    disc(d, w, h, [])
+
+
+def buzzsaw(d, w, h):
+    d.ellipse([1, 1, 12, 12], fill=W_MID)
+    for x, y in [(6, 0), (13, 6), (7, 13), (0, 7), (11, 1), (12, 11), (2, 12), (1, 2)]:
+        d.point((x, y), fill=W_LIGHT)
+    d.ellipse([5, 5, 8, 8], fill=W_GRIP)
+
+
+def riot_shield(d, w, h):  # 14x22
+    d.rectangle([0, 0, 13, 21], fill=OUTLINE)
+    d.rectangle([1, 1, 12, 20], fill=W_MID)
+    d.rectangle([1, 1, 12, 2], fill=W_LIGHT)
+    d.rectangle([2, 5, 11, 7], fill=(120, 190, 230, 255))  # visor slot
+    d.rectangle([6, 10, 7, 18], fill=W_DARK)
+
+
+def weapon_icon(roman):
+    # 14x14 -> 28x28: crossed blades with a numeral-like mark
+    img, d = canvas(14, 14)
+    d.line([1, 12, 12, 1], fill=STEEL_L)
+    d.line([2, 12, 12, 2], fill=STEEL)
+    d.line([1, 1, 12, 12], fill=STEEL_D)
+    d.rectangle([5, 5, 8, 8], fill=RED)
+    for i in range(roman):
+        d.point((6 + i if roman == 1 else 5 + i * 2, 6), fill=GOLD)
+        d.point((6 + i if roman == 1 else 5 + i * 2, 7), fill=GOLD)
+    save(img, f"Content/Abilities/Weapon{'One' if roman == 1 else 'Two'}.png")
+
+
+def weapons():
+    import os
+    os.makedirs("Content/Weapons", exist_ok=True)
+    weapon("EnergySword", 6, 28, energy_sword)
+    weapon("Katana", 5, 32, katana)
+    weapon("BattleAxe", 14, 30, battle_axe)
+    weapon("Warhammer", 14, 30, warhammer)
+    weapon("ReaperScythe", 18, 34, reaper_scythe)
+    weapon("ThrowingSpear", 5, 36, throwing_spear)
+    weapon("EnergyLance", 7, 40, energy_lance)
+    weapon("WristBlade", 4, 16, wrist_blade)
+    weapon("Railgun", 10, 42, railgun)
+    weapon("Chakram", 14, 14, chakram)
+    weapon("Buzzsaw", 14, 14, buzzsaw)
+    weapon("RiotShield", 14, 22, riot_shield)
+    weapon_icon(1)
+    weapon_icon(2)
+
+
 if __name__ == "__main__":
+    weapons()
     for tier in (1, 2, 3):
         arc_reactor(tier)
     stark_tablet()

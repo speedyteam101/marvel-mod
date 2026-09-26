@@ -57,6 +57,24 @@ Items: {
 			'''
 	}
 
+	WeaponOne: {
+		DisplayName: Weapon I
+		Tooltip:
+			'''
+			Uses the weapon attached to the suit's Weapon Slot I
+			Buy weapons in the Parts Store and attach them in the Suit Workshop
+			'''
+	}
+
+	WeaponTwo: {
+		DisplayName: Weapon II
+		Tooltip:
+			'''
+			Uses the weapon attached to the suit's Weapon Slot II
+			Buy weapons in the Parts Store and attach them in the Suit Workshop
+			'''
+	}
+
 	Unibeam: {
 		DisplayName: Unibeam
 		Tooltip:
@@ -79,6 +97,9 @@ Projectiles: {
 	SuitShot.DisplayName: Suit Shot
 	SuitExplosion.DisplayName: Explosion
 	UnibeamBeam.DisplayName: Unibeam
+	WeaponSwing.DisplayName: Attached Weapon
+	WeaponThrown.DisplayName: Thrown Weapon
+	RailBeam.DisplayName: Railgun Beam
 }
 
 Keybinds: {

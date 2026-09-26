@@ -15,10 +15,14 @@ namespace MarvelMod.Common.Suits
 		// Free options are unlocked from the start: the first option of each category and everything in the classic suit.
 		public bool Free { get; init; }
 
+		// The second weapon slot's entries share their key with the first slot's and aren't listed in the store.
+		public bool Hidden { get; init; }
+
 		public string Name => Category.OptionName(Index);
 
 		// Save key. Uses the option's name, so reordering options doesn't change what a player owns.
-		public string Key => $"{Category.Key}/{Name}";
+		// Weapons are owned once for both slots.
+		public string Key => Category.Group == SuitGroup.Weapons ? $"weapon/{Name}" : $"{Category.Key}/{Name}";
 	}
 
 	// What the Parts Store sells and for how much. Colours, Glow Strength and Glow Pulse are always free.
@@ -81,6 +85,10 @@ namespace MarvelMod.Common.Suits
 						price = set.PricePerPiece;
 						requirement = set.Requirement;
 					}
+					else if (category.Group == SuitGroup.Weapons) {
+						price = SuitWeapons.All[i].Price;
+						requirement = SuitWeapons.All[i].Requirement;
+					}
 					else if (Specials.TryGetValue((category.Key, name), out var special)) {
 						(price, requirement) = special;
 					}
@@ -100,6 +108,7 @@ namespace MarvelMod.Common.Suits
 						Price = price,
 						Requirement = requirement,
 						Set = set,
+						Hidden = category == SuitCatalog.WeaponSlot2,
 						Free = set == null && requirement == ShopRequirement.None && (i == 0 || classic[category] == i)
 					};
 					items.Add(item);

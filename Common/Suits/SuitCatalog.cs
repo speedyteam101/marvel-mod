@@ -9,7 +9,8 @@ namespace MarvelMod.Common.Suits
 		Paint,
 		Colours,
 		Effects,
-		Systems
+		Systems,
+		Weapons
 	}
 
 	// One row of the Suit Workshop: a list of named options, or a colour slot that picks from SuitPalette.
@@ -113,6 +114,13 @@ namespace MarvelMod.Common.Suits
 			new[] { "Balanced", "Overclocked", "Efficient", "Regenerative", "Unstable" },
 			"Trades damage, attack speed and regeneration");
 
+		// Attached weapons (see SuitWeapons). Both slots offer the same weapons; one purchase unlocks a weapon for both.
+		public static readonly SuitCategory WeaponSlot1 = Add("weaponSlot1", "Weapon Slot I", SuitGroup.Weapons, SuitWeapons.Names(),
+			"Used by the Weapon I ability; stowed on your back");
+		public static readonly SuitCategory WeaponSlot2 = Add("weaponSlot2", "Weapon Slot II", SuitGroup.Weapons, SuitWeapons.Names(),
+			"Used by the Weapon II ability; stowed on your back");
+		public static readonly SuitCategory WeaponColour = Add("weaponColour", "Weapon Colour", SuitGroup.Weapons, null);
+
 		public static int Count => All.Count;
 
 		// Sum of every option in every category.
@@ -150,6 +158,7 @@ namespace MarvelMod.Common.Suits
 			SuitGroup.Paint => "Paint Job",
 			SuitGroup.Colours => "Colours",
 			SuitGroup.Effects => "Effects",
+			SuitGroup.Weapons => "Weapons",
 			_ => "Systems"
 		};
 	}

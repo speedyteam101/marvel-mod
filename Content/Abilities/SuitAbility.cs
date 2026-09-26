@@ -38,7 +38,7 @@ namespace MarvelMod.Content.Abilities
 
 		public static SuitConfig SuitOf(Player player) => player.GetModPlayer<IronManPlayer>().Suit;
 
-		public bool IsAllowed(Player player) {
+		public virtual bool IsAllowed(Player player) {
 			IronManPlayer modPlayer = player.GetModPlayer<IronManPlayer>();
 			return modPlayer.SuitActive && modPlayer.ReactorTier >= RequiredTier;
 		}

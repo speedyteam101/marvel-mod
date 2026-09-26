@@ -53,7 +53,7 @@ Ability damage grows after you beat Skeletron, the Wall of Flesh, any mechanical
 
 ## Suit Workshop
 
-**1,338 options in 34 categories.** Every category is independent, so they combine into about 1.5 × 10⁴⁵ different suits. The workshop shows both numbers, calculated from the catalogue in `Common/Suits/SuitCatalog.cs`.
+**1,470 options in 37 categories.** Every category is independent, so they combine into about 4.8 × 10⁴⁹ different suits. The workshop shows both numbers, calculated from the catalogue in `Common/Suits/SuitCatalog.cs`.
 
 You start with the classic red-and-gold suit's parts and the first option of each category. Other parts must be bought in the Parts Store (below); locked options show their price in the workshop. **Colours, Glow Strength and Glow Pulse are always free.**
 
@@ -64,6 +64,7 @@ You start with the classic red-and-gold suit's parts and the first option of eac
 | Colours | 11 colour slots with 96 colours each: Primary, Secondary, Accent, Trim, Undersuit, Pattern, Emblem, Eye Glow, Reactor Glow, Repulsor Glow, Thrusters |
 | Effects | Glow Strength (5), Glow Pulse (4), Thruster Trail (12) |
 | Systems | Repulsor Mode (6), Shoulder Weapon (6), Unibeam Mode (4), Armour Plating (5), Thrusters (5), Power Core (5) |
+| Weapons | Weapon Slot I (18), Weapon Slot II (18), Weapon Colour (96) - see Attached weapons below |
 
 The **Systems** options change how the suit plays:
 
@@ -76,6 +77,32 @@ The **Systems** options change how the suit plays:
 
 The workshop has a live animated preview, the suit's stats for your current reactor, **Random Armour / Random Colours / Random Everything** buttons (they only pick parts you own), **17 presets** (one per premium set), and **5 save slots** per character. Your design is saved with the character and synced to other players in multiplayer.
 
+## Attached weapons
+
+The suit has **two weapon slots**. Buy weapons in the Parts Store's **Weapons** tab; each purchase works in either slot. Attach them in the workshop's Weapons group, or with **Equip** in the store (it fills an empty slot first). Attached weapons are carried on the suit's back (wrist blades sit on the gauntlet) and are tinted with the **Weapon Colour**. While suited up, the **Weapon I** and **Weapon II** ability items use whatever is in each slot. Loading a preset keeps your attached weapons.
+
+Damage below is base damage. Like the other abilities, it grows with bosses beaten and your Arc Reactor mark.
+
+| Weapon | Type | Damage | Price | Unlocks after | What it does |
+| --- | --- | --- | --- | --- | --- |
+| **Energy Sword** | melee | 48 | 5g | - | Glowing blade, wide swings |
+| **Riot Shield** | melee | 30 | 5g | - | Hold to block: +20 defense, 35% less damage, no knockback. Reflects enemy projectiles (single player / server side) and bashes enemies |
+| **Battle Axe** | melee | 70 | 6g | - | Slow heavy chops that ignore 20 defense |
+| **Throwing Spear** | ranged | 55 | 4g | - | Thrown, arcs down, pierces 3 enemies |
+| **Reaper Scythe** | melee | 60 | 12g | Wall of Flesh | Full 360° spin; hits heal you a little |
+| **Katana** | melee | 40 | 8g | - | Very fast slashes, +20% crit chance |
+| **Anti-Tank Railgun** | ranged | 400 | 40g | a mechanical boss | Instant beam through every enemy up to the first wall, big recoil |
+| **Warhammer** | melee | 90 | 10g | Wall of Flesh | Crushing swings; the first hit of each swing makes a shockwave |
+| **Energy Whip** | melee | 42 | 8g | - | Long energy lash (240 px reach) |
+| **Chakram** | ranged | 45 | 6g | - | Bladed disc that flies out and comes back |
+| **Flamethrower** | ranged | 14 | 10g | Wall of Flesh | Short-range fire stream that passes through crowds and burns |
+| **Plasma Cannon** | ranged | 120 | 20g | Plantera | Slow plasma orb with a huge explosion |
+| **Wrist Blades** | melee | 34 | 4g | - | Rapid stabs from the gauntlets |
+| **Grenade Launcher** | ranged | 65 | 6g | - | Grenades that bounce twice, then explode |
+| **Energy Lance** | melee | 75 | 15g | a mechanical boss | Charge forward while thrusting a long energy lance |
+| **Arc Caster** | ranged | 50 | 18g | Plantera | Lightning hits the enemy nearest your cursor and chains to 3 more |
+| **Buzzsaw Launcher** | ranged | 40 | 10g | Wall of Flesh | Saw blades that ricochet off walls up to 4 times |
+
 ## Parts Store
 
 Open it with **P** or the workshop's **Parts Store** button. Pay with coins from your inventory, piggy bank, safe, Defender's Forge or Void Vault. Click anything to see it in the **try-on preview** before you buy, then **Equip** it.
@@ -83,6 +110,7 @@ Open it with **P** or the workshop's **Parts Store** button. Pay with coins from
 | Tab | What's in it | Price |
 | --- | --- | --- |
 | Premium Sets | 7 sets of 10 pieces each, with set bonuses (below) | per piece, or 15% off when you buy the rest of a set |
+| Weapons | The 17 attached weapons above | 4g - 40g |
 | Armour | Helmets, faceplates, eyes, chests, reactors, shoulders, gauntlets, belts, legs, boots, back modules | 50 silver, going up 50 silver for each later option in a list (up to 8 gold) |
 | Paint & Effects | Patterns, emblems, finishes, thruster trails | 50 silver - 7 gold; trails 1 gold; premium finishes and trails below |
 | Systems | Repulsor, shoulder weapon and Unibeam modes, plating, thrusters, power cores | 5 gold each |
@@ -113,7 +141,7 @@ Characters created before the Parts Store existed keep every part they were alre
 
 ### How the suit is drawn
 
-The suit isn't a fixed sprite sheet. `Common/Suits/SuitRenderer.cs` builds it from small ASCII pixel masks for each part (`Common/Suits/SuitParts.cs`). It is drawn in side view facing right, and flipped when the player faces left. The masks are designed as front views, so the renderer adapts them. It puts the faceplate, eyes and reactor on the front edge, draws the near arm and leg over a darker far arm and leg, and shows only the half of each back module that sits behind the back. It adds patterns, emblem, finish shading and an outline, then caches the result as a texture. To add a new helmet, chest or other part, add a mask to `SuitParts.cs`. It shows up in the workshop and the store automatically, and the option count updates too. New premium sets go in `Common/Suits/SuitSets.cs`, and prices are set in `Common/Suits/SuitShop.cs`.
+The suit isn't a fixed sprite sheet. `Common/Suits/SuitRenderer.cs` builds it from small ASCII pixel masks for each part (`Common/Suits/SuitParts.cs`). It is drawn in side view facing right, and flipped when the player faces left. The masks are designed as front views, so the renderer adapts them. It puts the faceplate, eyes and reactor on the front edge, draws the near arm and leg over a darker far arm and leg, and shows only the half of each back module that sits behind the back. It adds patterns, emblem, finish shading and an outline, then caches the result as a texture. To add a new helmet, chest or other part, add a mask to `SuitParts.cs`. It shows up in the workshop and the store automatically, and the option count updates too. New premium sets go in `Common/Suits/SuitSets.cs`, new weapons in `Common/Suits/SuitWeapons.cs` (their sprites are in `Content/Weapons/`), and prices are set in `Common/Suits/SuitShop.cs`.
 
 ## Installing from source
 

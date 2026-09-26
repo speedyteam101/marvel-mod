@@ -17,7 +17,8 @@ namespace MarvelMod.Common.UI
 			Sets,
 			Armour,
 			Paint,
-			Systems
+			Systems,
+			Weapons
 		}
 
 		private const float ListTop = 108f;
@@ -61,15 +62,15 @@ namespace MarvelMod.Common.UI
 			root.Append(statusText);
 
 			float x = 0f;
-			foreach (var (t, label) in new[] { (Tab.Sets, "Premium Sets"), (Tab.Armour, "Armour"), (Tab.Paint, "Paint & Effects"), (Tab.Systems, "Systems") }) {
+			foreach (var (t, label) in new[] { (Tab.Sets, "Premium Sets"), (Tab.Weapons, "Weapons"), (Tab.Armour, "Armour"), (Tab.Paint, "Paint & Effects"), (Tab.Systems, "Systems") }) {
 				Tab captured = t;
 				var button = new WorkshopButton(label, () => SelectTab(captured), 0.9f);
 				button.Left.Set(x, 0f);
 				button.Top.Set(66f, 0f);
-				button.Width.Set(160f, 0f);
+				button.Width.Set(150f, 0f);
 				root.Append(button);
 				tabButtons.Add((t, button));
-				x += 166f;
+				x += 156f;
 			}
 
 			itemList = new UIList { ListPadding = 3f, ManualSortMethod = _ => { } };
@@ -153,7 +154,7 @@ namespace MarvelMod.Common.UI
 			else {
 				SuitCategory lastCategory = null;
 				foreach (ShopItem item in SuitShop.Items) {
-					if (item.Free || item.Set != null || TabOf(item.Category) != tab) {
+					if (item.Free || item.Hidden || item.Set != null || TabOf(item.Category) != tab) {
 						continue;
 					}
 					if (item.Category != lastCategory) {
@@ -173,6 +174,7 @@ namespace MarvelMod.Common.UI
 		private static Tab TabOf(SuitCategory category) => category.Group switch {
 			SuitGroup.Armour => Tab.Armour,
 			SuitGroup.Systems => Tab.Systems,
+			SuitGroup.Weapons => Tab.Weapons,
 			_ => Tab.Paint
 		};
 
@@ -295,7 +297,13 @@ namespace MarvelMod.Common.UI
 			string text = $"{item.Name}\n[c/B0B0B0:{item.Category.Name}]";
 			text += ModPlayer.Owns(item.Category, item.Index) ? "\n[c/7CFC00:Owned]" : $"\nPrice: {SuitShop.FormatPrice(item.Price)}";
 			text += RequirementLine(item.Requirement);
-			if (item.Category.Description != null) {
+			if (item.Category.Group == SuitGroup.Weapons) {
+				WeaponDef weapon = SuitWeapons.All[item.Index];
+				string type = weapon.Melee ? "melee" : "ranged";
+				text += $"\n\n{weapon.Description}\n{weapon.Damage} base damage ({type}), use time {weapon.UseTime}"
+					+ "\n\nAttach it to either weapon slot. While suited up, use it with the Weapon I or Weapon II ability.";
+			}
+			else if (item.Category.Description != null) {
 				text += $"\n\n{item.Category.Description}";
 			}
 			if (item.Set != null) {
@@ -347,6 +355,19 @@ namespace MarvelMod.Common.UI
 			else if (selectedItem != null) {
 				if (!modPlayer.Owns(selectedItem.Category, selectedItem.Index)) {
 					statusText.SetText("Buy it first.");
+					return;
+				}
+				if (selectedItem.Category.Group == SuitGroup.Weapons) {
+					// Fill an empty weapon slot first; if both are full, replace slot I.
+					SuitCategory slot = modPlayer.Suit[SuitCatalog.WeaponSlot1] == 0 || modPlayer.Suit[SuitCatalog.WeaponSlot2] != 0
+						? SuitCatalog.WeaponSlot1 : SuitCatalog.WeaponSlot2;
+					if (modPlayer.Suit[SuitCatalog.WeaponSlot1] == selectedItem.Index || modPlayer.Suit[SuitCatalog.WeaponSlot2] == selectedItem.Index) {
+						statusText.SetText($"{selectedItem.Name} is already attached.");
+						return;
+					}
+					modPlayer.Suit[slot] = selectedItem.Index;
+					statusText.SetText($"Attached {selectedItem.Name} to {slot.Name}.");
+					UpdateLabels();
 					return;
 				}
 				modPlayer.Suit[selectedItem.Category] = selectedItem.Index;

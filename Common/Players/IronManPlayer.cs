@@ -44,6 +44,10 @@ namespace MarvelMod.Common.Players
 		// Ticks until the Unibeam can fire again.
 		public int unibeamCooldown;
 
+		// Attached weapons: which way the next melee swing goes, and ticks left of Riot Shield blocking.
+		public int swingSide = 1;
+		public int shieldTimer;
+
 		// Parts bought in the Parts Store, by ShopItem.Key.
 		public HashSet<string> OwnedParts = new();
 
@@ -175,6 +179,13 @@ namespace MarvelMod.Common.Players
 				Player.fireWalk = true;
 			}
 			ApplySetEffects(SuitSets.WornBy(Suit));
+
+			if (shieldTimer > 0) {
+				// Blocking with the Riot Shield.
+				Player.statDefense += 20;
+				Player.endurance += 0.35f;
+				Player.noKnockback = true;
+			}
 		}
 
 		private static readonly int[] GodlyImmunities = {
@@ -366,6 +377,9 @@ namespace MarvelMod.Common.Players
 			}
 			if (lifeStealTimer > 0) {
 				lifeStealTimer--;
+			}
+			if (shieldTimer > 0) {
+				shieldTimer--;
 			}
 
 			UpdateFrame();

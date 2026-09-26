@@ -279,6 +279,12 @@ namespace MarvelMod.Common.UI
 				statusText.SetText($"Preset needs {missing} part{(missing == 1 ? "" : "s")} you don't own (Parts Store)");
 				return;
 			}
+			// Presets are looks: keep the weapons you have attached.
+			foreach (SuitCategory category in SuitCatalog.All) {
+				if (category.Group == SuitGroup.Weapons) {
+					preset[category] = Suit[category];
+				}
+			}
 			preset.CopyTo(Suit);
 			statusText.SetText($"Loaded preset: {SuitPresets.All[presetIndex].Name}");
 			UpdateLabels();

@@ -58,6 +58,9 @@ namespace MarvelMod.Common.Suits
 			config.Set(SuitCatalog.Plating, "Standard");
 			config.Set(SuitCatalog.Thrusters, "Standard");
 			config.Set(SuitCatalog.PowerCore, "Balanced");
+			config.Set(SuitCatalog.WeaponSlot1, "None");
+			config.Set(SuitCatalog.WeaponSlot2, "None");
+			config.Set(SuitCatalog.WeaponColour, "Silver");
 			return config;
 		}
 
