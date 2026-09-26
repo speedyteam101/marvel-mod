@@ -4,7 +4,7 @@ An unofficial, fan-made Marvel mod for **tModLoader** (Terraria 1.4.4). Become I
 
 ![Preset and randomly generated suits](docs/suits.png)
 
-*The ten preset suits followed by eight random designs, rendered by the mod's own suit renderer.*
+*The ten standard preset suits (standing, walking, aiming and flying, facing both ways), drawn by the mod's own suit renderer.*
 
 ## Getting started
 
@@ -113,7 +113,7 @@ Characters created before the Parts Store existed keep every part they were alre
 
 ### How the suit is drawn
 
-The suit isn't a fixed sprite sheet. `Common/Suits/SuitRenderer.cs` builds it from small ASCII pixel masks for each part (`Common/Suits/SuitParts.cs`). It adds patterns, emblem, finish shading and an outline, then caches the result as a texture. To add a new helmet, chest or other part, add a mask to `SuitParts.cs`. It shows up in the workshop and the store automatically, and the option count updates too. New premium sets go in `Common/Suits/SuitSets.cs`, and prices are set in `Common/Suits/SuitShop.cs`.
+The suit isn't a fixed sprite sheet. `Common/Suits/SuitRenderer.cs` builds it from small ASCII pixel masks for each part (`Common/Suits/SuitParts.cs`). It is drawn in side view facing right, and flipped when the player faces left. The masks are designed as front views, so the renderer adapts them. It puts the faceplate, eyes and reactor on the front edge, draws the near arm and leg over a darker far arm and leg, and shows only the half of each back module that sits behind the back. It adds patterns, emblem, finish shading and an outline, then caches the result as a texture. To add a new helmet, chest or other part, add a mask to `SuitParts.cs`. It shows up in the workshop and the store automatically, and the option count updates too. New premium sets go in `Common/Suits/SuitSets.cs`, and prices are set in `Common/Suits/SuitShop.cs`.
 
 ## Installing from source
 

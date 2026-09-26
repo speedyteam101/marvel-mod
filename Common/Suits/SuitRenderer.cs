@@ -39,7 +39,7 @@ namespace MarvelMod.Common.Suits
 	// Pure code with no Terraria calls, so the art can also be rendered outside the game (see tools/).
 	public static class SuitRenderer
 	{
-		// The suit is drawn on a 27 x 27 grid (feet on row 26, body centred on column 12) with a margin for the outline.
+		// The suit is drawn on a 27 x 27 grid (feet on row 26, body centred on column 12, facing right) with a margin for the outline.
 		private const int OffsetX = 2;
 		private const int OffsetY = 1;
 		public const int FrameWidth = 29;
@@ -70,6 +70,7 @@ namespace MarvelMod.Common.Suits
 				y += OffsetY;
 				if (x >= 0 && y >= 0 && x < FrameWidth && y < FrameHeight) {
 					Roles[y * FrameWidth + x] = role;
+					Far[y * FrameWidth + x] = false;
 				}
 			}
 
@@ -81,33 +82,76 @@ namespace MarvelMod.Common.Suits
 				}
 			}
 
-			// Draws a rectangle and its mirror image across the body's centre column.
-			public void MirrorRect(int x0, int y0, int x1, int y1, SuitRole role) {
-				Rect(x0, y0, x1, y1, role);
-				Rect(Mirror(x1), y0, Mirror(x0), y1, role);
+			// Back modules are designed for a front view (a left half and its mirror image). In the side view only the
+			// left half is drawn, moved right so it sits behind the torso.
+			public void BackRect(int x0, int y0, int x1, int y1, SuitRole role) {
+				Rect(x0 + BackShift, y0, x1 + BackShift, y1, role);
 			}
 
-			// shift(column) returns an (dx, dy) offset per mask column, used to move each leg separately.
-			public void Mask(string[] mask, int x0, int y0, bool mirror = false, Func<int, (int dx, int dy)> shift = null) {
+			// Pixels of limbs on the far side of the body, drawn darker.
+			public readonly bool[] Far = new bool[FrameWidth * FrameHeight];
+
+			public bool IsFar(int x, int y) {
+				x += OffsetX;
+				y += OffsetY;
+				return x >= 0 && y >= 0 && x < FrameWidth && y < FrameHeight && Far[y * FrameWidth + x];
+			}
+
+			// Draws mask columns colStart..colEnd (inclusive) with column colStart at x0.
+			// reverse flips those columns left to right. overlay only paints over pixels that are already drawn,
+			// so a faceplate can't stick out past the helmet. far marks the pixels as the darker, far-side limb.
+			// rowShift(row) moves each row sideways, used to angle the legs when striding.
+			public void Mask(string[] mask, int x0, int y0, int colStart = 0, int colEnd = int.MaxValue,
+				bool reverse = false, bool overlay = false, bool far = false, Func<int, int> rowShift = null) {
 				for (int row = 0; row < mask.Length; row++) {
 					string line = mask[row];
-					for (int col = 0; col < line.Length; col++) {
-						char c = line[col];
+					int last = Math.Min(colEnd, line.Length - 1);
+					for (int col = colStart; col <= last; col++) {
+						char c = line[reverse ? last - (col - colStart) : col];
 						if (c == '.') {
 							continue;
 						}
-						(int dx, int dy) = shift?.Invoke(col) ?? (0, 0);
-						int x = x0 + col;
-						if (mirror) {
-							x = Mirror(x);
+						int x = x0 + col - colStart + (rowShift?.Invoke(row) ?? 0);
+						int y = y0 + row;
+						if (overlay && Get(x, y) == SuitRole.None) {
+							continue;
 						}
-						Set(x + dx, y0 + row + dy, RoleOf(c));
+						Set(x, y, RoleOf(c));
+						int px = x + OffsetX, py = y + OffsetY;
+						if (px >= 0 && py >= 0 && px < FrameWidth && py < FrameHeight) {
+							Far[py * FrameWidth + px] = far;
+						}
+					}
+				}
+			}
+
+			// Darkens already-drawn armour pixels in a rectangle, to separate a limb from the body behind it.
+			public void Seam(int x0, int y0, int x1, int y1) {
+				for (int y = y0; y <= y1; y++) {
+					for (int x = x0; x <= x1; x++) {
+						SuitRole role = Get(x, y);
+						if (role != SuitRole.None && !IsGlow(role)) {
+							Set(x, y, SuitRole.Dark);
+						}
+					}
+				}
+			}
+
+			public void FarRect(int x0, int y0, int x1, int y1, SuitRole role) {
+				Rect(x0, y0, x1, y1, role);
+				for (int y = y0; y <= y1; y++) {
+					for (int x = x0; x <= x1; x++) {
+						int px = x + OffsetX, py = y + OffsetY;
+						if (px >= 0 && py >= 0 && px < FrameWidth && py < FrameHeight) {
+							Far[py * FrameWidth + px] = true;
+						}
 					}
 				}
 			}
 		}
 
-		private static int Mirror(int x) => 24 - x;
+		// How far back modules are moved right in the side view.
+		private const int BackShift = 5;
 
 		public static SuitRole RoleOf(char c) => c switch {
 			'P' => SuitRole.Primary,
@@ -135,54 +179,77 @@ namespace MarvelMod.Common.Suits
 			}
 		}
 
+		// The suit is drawn in side view, facing right (the draw code flips it to face left). Parts are designed as
+		// front-view masks, so each is adapted here: the front of the face and chest faces right, one leg and arm are in
+		// front of the body and the other pair is drawn darker behind it.
 		private static void DrawFrame(SuitConfig config, SuitFrame frame, Canvas c) {
 			bool aiming = frame is SuitFrame.Aim or SuitFrame.FlyAim;
 			bool flying = frame is SuitFrame.Fly or SuitFrame.FlyAim;
 
-			// Leg offsets: walking lifts one leg at a time, jumping tucks both, flying brings them together.
-			(int dx, int dy) left = (0, 0), right = (0, 0);
+			// Stride of each foot (how far forward it is), near leg lift, and arm swing.
+			int near = 0, far = 0, lift = 0, swing = 0;
 			switch (frame) {
-				case SuitFrame.Walk1: left = (0, -1); break;
-				case SuitFrame.Walk3: right = (0, -1); break;
-				case SuitFrame.Jump: left = (0, -1); right = (0, -1); break;
+				case SuitFrame.Walk1: near = 3; far = -3; swing = -1; break;
+				case SuitFrame.Walk2: near = 1; far = -1; break;
+				case SuitFrame.Walk3: near = -3; far = 3; swing = 1; break;
+				case SuitFrame.Walk4: near = -1; far = 1; break;
+				case SuitFrame.Jump: near = 2; far = -1; lift = -1; break;
 			}
 			if (flying) {
-				left = (1, 0);
-				right = (-1, 0);
+				near = -2; // legs trail behind
+				far = -3;
 			}
 
 			DrawBack(c, config.OptionName(SuitCatalog.Back));
 
-			c.Mask(SuitParts.Legs[config[SuitCatalog.Legs]].Mask, 8, 18, shift: col => col < 4 ? left : col > 4 ? right : (0, 0));
-			c.Mask(SuitParts.Boots[config[SuitCatalog.Boots]].Mask, 7, 24, shift: col => col < 5 ? left : col > 5 ? right : (0, 0));
-
-			// Upper arms and gauntlets. The front (right-hand) arm is raised instead when aiming.
+			string[] legs = SuitParts.Legs[config[SuitCatalog.Legs]].Mask;
+			string[] boots = SuitParts.Boots[config[SuitCatalog.Boots]].Mask;
 			string[] gauntlet = SuitParts.Gauntlets[config[SuitCatalog.Gauntlets]].Mask;
-			c.Rect(5, 12, 6, 14, SuitRole.Primary);
-			c.Mask(gauntlet, 4, 14);
+
+			// Legs pivot at the hip: each row of the leg moves a bit further, and the boot moves the full stride.
+			static Func<int, int> Leg(int stride) => row => (int)MathF.Round(stride * (row + 1) / 7f);
+
+			// Far leg and boot (the right-hand leg of the front view; its outer side already points forward).
+			c.Mask(legs, 10, 18, colStart: 5, colEnd: 8, far: true, rowShift: Leg(far));
+			c.Mask(boots, 10 + far, 24, colStart: 6, colEnd: 10, far: true);
+
+			// Far arm, mostly hidden behind the body.
 			if (!aiming) {
-				c.Rect(18, 12, 19, 14, SuitRole.Primary);
-				c.Mask(gauntlet, 4, 14, mirror: true);
+				c.FarRect(11 - swing, 11, 12 - swing, 14, SuitRole.Primary);
+				c.Mask(gauntlet, 10 - swing, 14, colStart: 0, colEnd: 3, reverse: true, far: true);
 			}
 
-			c.Mask(SuitParts.Chests[config[SuitCatalog.Chest]].Mask, 7, 9);
-			c.Mask(SuitParts.Belts[config[SuitCatalog.Belt]].Mask, 8, 16);
-			c.Mask(SuitParts.Emblems[config[SuitCatalog.Emblem]].Mask, 10, 14);
-			c.Mask(SuitParts.Reactors[config[SuitCatalog.Reactor]].Mask, 10, 11);
+			// Near leg and boot, with the toe turned forward.
+			c.Mask(legs, 10, 18 + lift, colStart: 0, colEnd: 3, rowShift: Leg(near));
+			c.Mask(boots, 10 + near, 24 + lift, colStart: 0, colEnd: 4, reverse: true);
 
+			// Torso: the front half of the chest plate, with the reactor on the front edge.
+			c.Mask(SuitParts.Chests[config[SuitCatalog.Chest]].Mask, 9, 9, colStart: 4, colEnd: 10);
+			c.Mask(SuitParts.Belts[config[SuitCatalog.Belt]].Mask, 9, 16, colStart: 2, colEnd: 8);
+			c.Mask(SuitParts.Reactors[config[SuitCatalog.Reactor]].Mask, 13, 11, colStart: 2, colEnd: 4, overlay: true);
+
+			// Near arm: hanging and swinging, or held out forward when aiming.
 			if (aiming) {
-				c.Rect(18, 12, 22, 13, SuitRole.Primary);
-				c.Rect(22, 11, 24, 14, SuitRole.Secondary);
-				c.Rect(25, 12, 25, 13, SuitRole.Repulsor);
+				c.Seam(11, 13, 15, 13);
+				c.Rect(12, 11, 18, 12, SuitRole.Primary);
+				c.Rect(19, 10, 21, 13, SuitRole.Secondary);
+				c.Rect(22, 11, 22, 12, SuitRole.Repulsor);
+			}
+			else {
+				c.Seam(10 + swing, 12, 10 + swing, 14);
+				c.Seam(13 + swing, 12, 13 + swing, 14);
+				c.Rect(11 + swing, 11, 12 + swing, 14, SuitRole.Primary);
+				c.Mask(gauntlet, 10 + swing, 14, colStart: 0, colEnd: 3, reverse: true);
 			}
 
-			string[] shoulder = SuitParts.Shoulders[config[SuitCatalog.Shoulders]].Mask;
-			c.Mask(shoulder, 4, 9);
-			c.Mask(shoulder, 4, 9, mirror: true);
+			// Shoulder pad, with the emblem painted on it.
+			c.Mask(SuitParts.Shoulders[config[SuitCatalog.Shoulders]].Mask, 10, 9, reverse: true);
+			c.Mask(SuitParts.Emblems[config[SuitCatalog.Emblem]].Mask, 10, 9, colStart: 1, colEnd: 3, overlay: true);
 
+			// Head: the faceplate and eyes sit on the front of the helmet.
 			c.Mask(SuitParts.Helmets[config[SuitCatalog.Helmet]].Mask, 8, 0);
-			c.Mask(SuitParts.Faceplates[config[SuitCatalog.Faceplate]].Mask, 9, 5);
-			c.Mask(SuitParts.Eyes[config[SuitCatalog.Eyes]].Mask, 9, 5);
+			c.Mask(SuitParts.Faceplates[config[SuitCatalog.Faceplate]].Mask, 13, 5, colStart: 3, colEnd: 6, overlay: true);
+			c.Mask(SuitParts.Eyes[config[SuitCatalog.Eyes]].Mask, 14, 5, colStart: 4, colEnd: 6, overlay: true);
 
 			ApplyPattern(c, config[SuitCatalog.Pattern]);
 		}
@@ -190,98 +257,98 @@ namespace MarvelMod.Common.Suits
 		private static void DrawBack(Canvas c, string style) {
 			switch (style) {
 				case "Jetpack":
-					c.MirrorRect(2, 8, 3, 15, SuitRole.Secondary);
-					c.MirrorRect(2, 7, 3, 7, SuitRole.Trim);
-					c.MirrorRect(2, 16, 3, 16, SuitRole.Dark);
+					c.BackRect(2, 8, 3, 15, SuitRole.Secondary);
+					c.BackRect(2, 7, 3, 7, SuitRole.Trim);
+					c.BackRect(2, 16, 3, 16, SuitRole.Dark);
 					break;
 				case "Flight Fins":
-					c.MirrorRect(2, 5, 3, 6, SuitRole.Accent);
-					c.MirrorRect(1, 7, 3, 8, SuitRole.Accent);
-					c.MirrorRect(0, 9, 3, 10, SuitRole.Accent);
+					c.BackRect(2, 5, 3, 6, SuitRole.Accent);
+					c.BackRect(1, 7, 3, 8, SuitRole.Accent);
+					c.BackRect(0, 9, 3, 10, SuitRole.Accent);
 					break;
 				case "Wing Blades":
 					for (int i = 0; i < 6; i++) {
-						c.MirrorRect(5 - i, 8 - i, 5 - i, 9 - i, SuitRole.Accent);
+						c.BackRect(5 - i, 8 - i, 5 - i, 9 - i, SuitRole.Accent);
 					}
 					for (int i = 0; i < 4; i++) {
-						c.MirrorRect(3 - i, 10 + i, 3 - i, 10 + i, SuitRole.Accent);
+						c.BackRect(3 - i, 10 + i, 3 - i, 10 + i, SuitRole.Accent);
 					}
 					break;
 				case "Twin Tanks":
-					c.MirrorRect(5, 3, 6, 8, SuitRole.Secondary);
-					c.MirrorRect(5, 2, 6, 2, SuitRole.Trim);
+					c.BackRect(5, 3, 6, 8, SuitRole.Secondary);
+					c.BackRect(5, 2, 6, 2, SuitRole.Trim);
 					break;
 				case "Missile Pods":
-					c.MirrorRect(4, 5, 7, 8, SuitRole.Secondary);
-					c.MirrorRect(4, 5, 4, 5, SuitRole.Accent);
-					c.MirrorRect(6, 5, 6, 5, SuitRole.Accent);
-					c.MirrorRect(4, 6, 7, 6, SuitRole.Dark);
+					c.BackRect(4, 5, 7, 8, SuitRole.Secondary);
+					c.BackRect(4, 5, 4, 5, SuitRole.Accent);
+					c.BackRect(6, 5, 6, 5, SuitRole.Accent);
+					c.BackRect(4, 6, 7, 6, SuitRole.Dark);
 					break;
 				case "Antennae":
-					c.MirrorRect(6, 1, 6, 8, SuitRole.Trim);
-					c.MirrorRect(6, 0, 6, 0, SuitRole.Accent);
+					c.BackRect(6, 1, 6, 8, SuitRole.Trim);
+					c.BackRect(6, 0, 6, 0, SuitRole.Accent);
 					break;
 				case "Power Pack":
-					c.Rect(4, 6, 20, 8, SuitRole.Secondary);
-					c.MirrorRect(5, 7, 6, 7, SuitRole.Reactor);
+					c.BackRect(4, 6, 7, 8, SuitRole.Secondary);
+					c.BackRect(5, 7, 6, 7, SuitRole.Reactor);
 					break;
 				case "Radiator Fins":
 					for (int i = 0; i < 5; i++) {
-						c.MirrorRect(1, 6 + 2 * i, 3, 6 + 2 * i, SuitRole.Trim);
+						c.BackRect(1, 6 + 2 * i, 3, 6 + 2 * i, SuitRole.Trim);
 					}
 					break;
 				case "Rocket Boosters":
-					c.MirrorRect(1, 5, 3, 15, SuitRole.Secondary);
-					c.MirrorRect(1, 4, 3, 4, SuitRole.Accent);
-					c.MirrorRect(2, 3, 2, 3, SuitRole.Accent);
-					c.MirrorRect(1, 16, 3, 16, SuitRole.Thruster);
+					c.BackRect(1, 5, 3, 15, SuitRole.Secondary);
+					c.BackRect(1, 4, 3, 4, SuitRole.Accent);
+					c.BackRect(2, 3, 2, 3, SuitRole.Accent);
+					c.BackRect(1, 16, 3, 16, SuitRole.Thruster);
 					break;
 
 				// Premium set backs
 				case "Bat Wings":
-					c.MirrorRect(1, 4, 5, 4, SuitRole.Accent);
-					c.MirrorRect(0, 5, 3, 11, SuitRole.Undersuit);
-					c.MirrorRect(0, 5, 0, 11, SuitRole.Accent);
-					c.MirrorRect(2, 5, 2, 10, SuitRole.Accent);
-					c.MirrorRect(1, 11, 1, 11, SuitRole.None); // scalloped edge
+					c.BackRect(1, 4, 5, 4, SuitRole.Accent);
+					c.BackRect(0, 5, 3, 11, SuitRole.Undersuit);
+					c.BackRect(0, 5, 0, 11, SuitRole.Accent);
+					c.BackRect(2, 5, 2, 10, SuitRole.Accent);
+					c.BackRect(1, 11, 1, 11, SuitRole.None); // scalloped edge
 					break;
 				case "Flame Wings":
-					c.MirrorRect(3, 3, 3, 5, SuitRole.Thruster);
-					c.MirrorRect(2, 5, 3, 8, SuitRole.Thruster);
-					c.MirrorRect(1, 7, 3, 10, SuitRole.Thruster);
-					c.MirrorRect(0, 9, 3, 12, SuitRole.Thruster);
-					c.MirrorRect(1, 2, 1, 4, SuitRole.Thruster);
+					c.BackRect(3, 3, 3, 5, SuitRole.Thruster);
+					c.BackRect(2, 5, 3, 8, SuitRole.Thruster);
+					c.BackRect(1, 7, 3, 10, SuitRole.Thruster);
+					c.BackRect(0, 9, 3, 12, SuitRole.Thruster);
+					c.BackRect(1, 2, 1, 4, SuitRole.Thruster);
 					break;
 				case "Reactor Stacks":
-					c.MirrorRect(2, 2, 4, 2, SuitRole.Trim);
-					c.MirrorRect(2, 3, 4, 14, SuitRole.Secondary);
-					c.MirrorRect(3, 4, 3, 12, SuitRole.Reactor);
+					c.BackRect(2, 2, 4, 2, SuitRole.Trim);
+					c.BackRect(2, 3, 4, 14, SuitRole.Secondary);
+					c.BackRect(3, 4, 3, 12, SuitRole.Reactor);
 					break;
 				case "Crystal Shards":
-					c.MirrorRect(3, 2, 3, 7, SuitRole.Accent);
-					c.MirrorRect(1, 4, 1, 9, SuitRole.Accent);
-					c.MirrorRect(2, 6, 2, 11, SuitRole.Accent);
-					c.MirrorRect(0, 8, 0, 12, SuitRole.Accent);
+					c.BackRect(3, 2, 3, 7, SuitRole.Accent);
+					c.BackRect(1, 4, 1, 9, SuitRole.Accent);
+					c.BackRect(2, 6, 2, 11, SuitRole.Accent);
+					c.BackRect(0, 8, 0, 12, SuitRole.Accent);
 					break;
 				case "Tesla Array":
-					c.MirrorRect(4, 1, 4, 8, SuitRole.Trim);
-					c.MirrorRect(4, 0, 4, 0, SuitRole.Repulsor);
-					c.MirrorRect(2, 4, 2, 10, SuitRole.Trim);
-					c.MirrorRect(2, 3, 2, 3, SuitRole.Repulsor);
-					c.MirrorRect(2, 6, 4, 6, SuitRole.Trim);
+					c.BackRect(4, 1, 4, 8, SuitRole.Trim);
+					c.BackRect(4, 0, 4, 0, SuitRole.Repulsor);
+					c.BackRect(2, 4, 2, 10, SuitRole.Trim);
+					c.BackRect(2, 3, 2, 3, SuitRole.Repulsor);
+					c.BackRect(2, 6, 4, 6, SuitRole.Trim);
 					break;
 				case "Void Tendrils":
 					int[] xs = { 4, 3, 3, 2, 2, 1, 1, 0, 0, 1 };
 					for (int i = 0; i < xs.Length; i++) {
-						c.MirrorRect(xs[i], 3 + i, xs[i], 3 + i, i % 3 == 2 ? SuitRole.Eye : SuitRole.Dark);
+						c.BackRect(xs[i], 3 + i, xs[i], 3 + i, i % 3 == 2 ? SuitRole.Eye : SuitRole.Dark);
 					}
 					break;
 				case "Angel Wings":
-					c.MirrorRect(0, 3, 3, 4, SuitRole.Accent);
-					c.MirrorRect(0, 5, 4, 6, SuitRole.Secondary);
-					c.MirrorRect(0, 7, 3, 8, SuitRole.Secondary);
-					c.MirrorRect(1, 9, 3, 10, SuitRole.Secondary);
-					c.MirrorRect(2, 11, 3, 12, SuitRole.Secondary);
+					c.BackRect(0, 3, 3, 4, SuitRole.Accent);
+					c.BackRect(0, 5, 4, 6, SuitRole.Secondary);
+					c.BackRect(0, 7, 3, 8, SuitRole.Secondary);
+					c.BackRect(1, 9, 3, 10, SuitRole.Secondary);
+					c.BackRect(2, 11, 3, 12, SuitRole.Secondary);
 					break;
 			}
 		}
@@ -417,6 +484,9 @@ namespace MarvelMod.Common.Suits
 						}
 					}
 
+					if (c.IsFar(x, y)) {
+						colour = Shade(colour, -0.35f);
+					}
 					body[index] = colour;
 					glow[index] = Color.Transparent;
 				}

@@ -127,12 +127,16 @@ namespace MarvelMod.Common.UI
 			timer++;
 		}
 
-		private SuitFrame CurrentFrame() {
+		private static int SequenceLength() {
 			int total = 0;
 			foreach (var step in Sequence) {
 				total += step.Ticks;
 			}
-			int t = timer % total;
+			return total;
+		}
+
+		private SuitFrame CurrentFrame() {
+			int t = timer % SequenceLength();
 			foreach (var step in Sequence) {
 				if (t < step.Ticks) {
 					return step.Frame;
@@ -152,8 +156,10 @@ namespace MarvelMod.Common.UI
 			Vector2 feet = new(inner.X + inner.Width / 2f, inner.Y + inner.Height / 2f + SuitRenderer.FrameHeight * scale / 2f);
 			Rectangle source = SuitRenderer.FrameRect(CurrentFrame());
 
-			spriteBatch.Draw(textures.Body, feet, source, Color.White, 0f, SuitRenderer.Origin, scale, SpriteEffects.None, 0f);
-			spriteBatch.Draw(textures.Glow, feet, source, Color.White * modPlayer.GlowIntensity(), 0f, SuitRenderer.Origin, scale, SpriteEffects.None, 0f);
+			// Turn around every other loop to show both directions.
+			SpriteEffects effects = timer / SequenceLength() % 2 == 1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+			spriteBatch.Draw(textures.Body, feet, source, Color.White, 0f, SuitRenderer.Origin, scale, effects, 0f);
+			spriteBatch.Draw(textures.Glow, feet, source, Color.White * modPlayer.GlowIntensity(), 0f, SuitRenderer.Origin, scale, effects, 0f);
 		}
 	}
 }
