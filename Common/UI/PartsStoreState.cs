@@ -37,6 +37,8 @@ namespace MarvelMod.Common.UI
 		private Tab tab = Tab.Sets;
 		private ShopItem selectedItem;
 		private SuitSet selectedSet = SuitSets.Vampiric;
+		private bool giantSelected;
+		private WorkshopButton giantButton;
 
 		private static IronManPlayer ModPlayer => Main.LocalPlayer.GetModPlayer<IronManPlayer>();
 
@@ -143,7 +145,11 @@ namespace MarvelMod.Common.UI
 			itemList.Clear();
 			rows.Clear();
 
+			giantButton = null;
 			if (tab == Tab.Sets) {
+				giantButton = new WorkshopButton("", SelectGiant);
+				giantButton.Width.Set(0f, 1f);
+				itemList.Add(giantButton);
 				foreach (SuitSet set in SuitSets.All) {
 					AddRow(SetLabel(set), null, set);
 					foreach (var (category, option) in set.Pieces()) {
@@ -206,7 +212,30 @@ namespace MarvelMod.Common.UI
 			return SuitShop.FormatPrice(item.Price);
 		}
 
+		private void SelectGiant() {
+			giantSelected = true;
+			selectedItem = null;
+			selectedSet = null;
+			statusText.SetText("");
+			UpdateLabels();
+		}
+
+		private static string GiantLabel() {
+			string status = ModPlayer.OwnsGiantSuit ? "[c/7CFC00:owned]" : SuitShop.FormatPrice(IronManPlayer.GiantSuitPrice);
+			return $"[c/FF9030:GIANT SUIT]  {status}";
+		}
+
+		private static string GiantDetails() {
+			return "[c/FF9030:Giant Suit]\n"
+				+ (ModPlayer.OwnsGiantSuit ? "[c/7CFC00:Owned]" : $"Price: {SuitShop.FormatPrice(IronManPlayer.GiantSuitPrice)}")
+				+ "\n\nWhile suited up, press the Giant Suit key (G) to become a giant version of your suit, twice the size."
+				+ "\n+80 defense, +25% damage reduction, +50% damage and no knockback, but slower."
+				+ "\n\nNine giant abilities replace your normal ones: Titan Punch, Ground Pound, Mega Repulsor, Missile Barrage,"
+				+ " Giant Unibeam, Shockwave Clap, Rocket Charge, Shield Dome and Orbital Strike.";
+		}
+
 		private void Select(ShopItem item, SuitSet set) {
+			giantSelected = false;
 			selectedItem = item;
 			selectedSet = set;
 			statusText.SetText("");
@@ -248,6 +277,19 @@ namespace MarvelMod.Common.UI
 				else {
 					button.SetText(SetLabel(set));
 				}
+			}
+
+			if (giantButton != null) {
+				giantButton.SetText(GiantLabel());
+				giantButton.Selected = giantSelected;
+				giantButton.Locked = !ModPlayer.OwnsGiantSuit;
+			}
+			if (giantSelected) {
+				buyButton.SetText(ModPlayer.OwnsGiantSuit ? "Owned" : $"Buy: {SuitShop.FormatPrice(IronManPlayer.GiantSuitPrice)}");
+				buySetButton.SetText("(no set selected)");
+				equipButton.SetText(ModPlayer.giantForm ? "Turn back to normal size" : "Transform (G)");
+				detailsText.SetText(GiantDetails());
+				return;
 			}
 
 			SuitSet context = ContextSet;
@@ -323,6 +365,11 @@ namespace MarvelMod.Common.UI
 		}
 
 		private void Buy() {
+			if (giantSelected) {
+				statusText.SetText(ModPlayer.BuyGiantSuit());
+				SelectTab(tab);
+				return;
+			}
 			if (selectedItem == null) {
 				return;
 			}
@@ -341,6 +388,11 @@ namespace MarvelMod.Common.UI
 
 		private void Equip() {
 			IronManPlayer modPlayer = ModPlayer;
+			if (giantSelected) {
+				modPlayer.ToggleGiant();
+				UpdateLabels();
+				return;
+			}
 			if (selectedSet != null) {
 				int missing = selectedSet.PieceCount - modPlayer.SetPiecesOwned(selectedSet);
 				if (missing > 0) {

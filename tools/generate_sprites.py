@@ -284,6 +284,61 @@ def weapon_icon(roman):
     save(img, f"Content/Abilities/Weapon{'One' if roman == 1 else 'Two'}.png")
 
 
+# Giant suit ability icons, 14x14 -> 28x28, on a dark orange badge.
+def giant_icon(name, draw):
+    img, d = canvas(14, 14)
+    d.rectangle([0, 0, 13, 13], fill=OUTLINE)
+    d.rectangle([1, 1, 12, 12], fill=(90, 40, 20, 255))
+    draw(d)
+    save(img, f"Content/Abilities/{name}.png")
+
+
+def giant_icons():
+    def punch(d):
+        d.rectangle([3, 4, 10, 10], fill=RED)
+        d.rectangle([3, 4, 10, 5], fill=RED_L)
+        for x in (4, 6, 8):
+            d.line([x, 4, x, 6], fill=RED_D)
+        d.rectangle([3, 9, 10, 10], fill=GOLD)
+    def pound(d):
+        d.rectangle([5, 2, 8, 7], fill=RED)
+        d.line([1, 11, 12, 11], fill=STEEL_L)
+        d.point((2, 9), fill=STEEL); d.point((11, 9), fill=STEEL); d.point((3, 8), fill=STEEL); d.point((10, 8), fill=STEEL)
+    def mega(d):
+        d.ellipse([2, 2, 11, 11], fill=CYAN_D)
+        d.ellipse([4, 4, 9, 9], fill=CYAN)
+        d.ellipse([5, 5, 8, 8], fill=CYAN_L)
+    def missiles(d):
+        for x in (2, 5, 8, 11):
+            d.line([x, 3, x, 10], fill=STEEL)
+            d.point((x, 2), fill=RED_L)
+            d.point((x, 11), fill=ORANGE)
+    def beam(d):
+        d.ellipse([1, 4, 6, 9], fill=GOLD)
+        d.rectangle([5, 5, 12, 8], fill=CYAN)
+        d.rectangle([5, 6, 12, 7], fill=CYAN_L)
+    def clap(d):
+        d.rectangle([2, 3, 5, 10], fill=RED)
+        d.rectangle([8, 3, 11, 10], fill=RED)
+        d.line([6, 2, 7, 11], fill=STEEL_L)
+    def charge(d):
+        d.polygon([(2, 7), (9, 3), (9, 11)], fill=RED)
+        d.rectangle([9, 5, 12, 9], fill=ORANGE)
+    def dome(d):
+        d.arc([1, 2, 12, 15], 180, 360, fill=CYAN)
+        d.arc([2, 3, 11, 14], 180, 360, fill=CYAN_D)
+        d.rectangle([5, 7, 8, 12], fill=RED)
+    def orbital(d):
+        d.rectangle([5, 1, 8, 9], fill=CYAN)
+        d.rectangle([6, 1, 7, 9], fill=CYAN_L)
+        d.line([2, 11, 11, 11], fill=RED_L)
+        d.line([6, 10, 7, 12], fill=RED_L)
+    for name, fn in [("TitanPunch", punch), ("GroundPound", pound), ("MegaRepulsor", mega), ("MissileBarrage", missiles),
+                     ("GiantUnibeam", beam), ("ShockwaveClap", clap), ("RocketCharge", charge), ("ShieldDome", dome),
+                     ("OrbitalStrike", orbital)]:
+        giant_icon(name, fn)
+
+
 def weapons():
     import os
     os.makedirs("Content/Weapons", exist_ok=True)
@@ -304,6 +359,7 @@ def weapons():
 
 
 if __name__ == "__main__":
+    giant_icons()
     weapons()
     for tier in (1, 2, 3):
         arc_reactor(tier)

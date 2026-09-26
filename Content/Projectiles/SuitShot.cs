@@ -23,7 +23,8 @@ namespace MarvelMod.Content.Projectiles
 		Bomblet,
 		Flame,
 		Plasma,
-		Grenade
+		Grenade,
+		MegaRepulsor
 	}
 
 	// Every suit projectile except the Unibeam and melee weapons. ai[0] is the ShotKind; ai[1] = 1 makes a repulsor piercing.
@@ -33,7 +34,7 @@ namespace MarvelMod.Content.Projectiles
 		private ShotKind Kind => (ShotKind)(int)Projectile.ai[0];
 
 		private bool Explosive => Kind is ShotKind.HeavyRepulsor or ShotKind.Missile or ShotKind.Rocket or ShotKind.ClusterBomb
-			or ShotKind.Bomblet or ShotKind.Plasma or ShotKind.Grenade;
+			or ShotKind.Bomblet or ShotKind.Plasma or ShotKind.Grenade or ShotKind.MegaRepulsor;
 
 		private bool HasGravity => Kind is ShotKind.Flare or ShotKind.ClusterBomb or ShotKind.Bomblet or ShotKind.Grenade;
 
@@ -107,6 +108,10 @@ namespace MarvelMod.Content.Projectiles
 				case ShotKind.Grenade:
 					Projectile.Resize(12, 12);
 					Projectile.timeLeft = 100;
+					break;
+				case ShotKind.MegaRepulsor:
+					Projectile.Resize(44, 44);
+					Projectile.timeLeft = 90;
 					break;
 			}
 		}
@@ -227,6 +232,7 @@ namespace MarvelMod.Content.Projectiles
 					int size = Kind switch {
 						ShotKind.Rocket => 150,
 						ShotKind.Plasma => 160,
+						ShotKind.MegaRepulsor => 220,
 						ShotKind.Grenade => 90,
 						ShotKind.HeavyRepulsor => 90,
 						ShotKind.Missile => 60,
@@ -275,6 +281,7 @@ namespace MarvelMod.Content.Projectiles
 				ShotKind.Flare => new Vector2(1f, 1f),
 				ShotKind.Flame => new Vector2(1.2f, 1.2f) * (1.8f - Projectile.timeLeft / 35f),
 				ShotKind.Plasma => new Vector2(2.8f, 2.4f),
+				ShotKind.MegaRepulsor => new Vector2(5f, 3.6f),
 				_ => new Vector2(1.8f, 1f)
 			};
 			Main.EntitySpriteDraw(orb, position, null, colour, Projectile.rotation, orb.Size() / 2f, stretch, SpriteEffects.None, 0);

@@ -38,9 +38,12 @@ namespace MarvelMod.Content.Abilities
 
 		public static SuitConfig SuitOf(Player player) => player.GetModPlayer<IronManPlayer>().Suit;
 
+		// Giant suit abilities are only given in giant form; the normal ones only outside it.
+		protected virtual bool GiantOnly => false;
+
 		public virtual bool IsAllowed(Player player) {
 			IronManPlayer modPlayer = player.GetModPlayer<IronManPlayer>();
-			return modPlayer.SuitActive && modPlayer.ReactorTier >= RequiredTier;
+			return modPlayer.SuitActive && modPlayer.ReactorTier >= RequiredTier && modPlayer.giantForm == GiantOnly;
 		}
 
 		public override bool CanUseItem(Player player) => IsAllowed(player);

@@ -6,6 +6,7 @@ A fan-made Marvel mod. Become Iron Man and design your own suit.
 - Suit weapons while suited up: Repulsors, a Shoulder Weapon (micro-missiles, minigun, flares, laser, rocket or cluster bombs) and, from Mk II, the chest Unibeam.
 - Parts Store (default key P): buy parts with coins, try them on first, including twelve premium sets with set bonuses: Vampiric, Infernal, Titan, Cryo, Storm, Void, Godly, Dragon, Samurai, Shinobi, Pharaoh and Cyber.
 - Two weapon slots for attached weapons: Energy Sword, Riot Shield, Battle Axe, Throwing Spear, Reaper Scythe, Katana, Anti-Tank Railgun, Warhammer, Energy Whip, Chakram, Flamethrower, Plasma Cannon, Wrist Blades, Grenade Launcher, Energy Lance, Arc Caster and Buzzsaw Launcher.
+- Giant Suit (50 platinum): become a giant version of your suit with nine abilities - Titan Punch, Ground Pound, Mega Repulsor, Missile Barrage, Giant Unibeam, Shockwave Clap, Rocket Charge, Shield Dome and Orbital Strike.
 - Twenty-two preset suits and five save slots for your own designs.
 
 This is an unofficial fan project and is not affiliated with or endorsed by Marvel or Disney.

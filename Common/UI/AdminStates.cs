@@ -141,7 +141,7 @@ namespace MarvelMod.Common.UI
 
 			float y = 72f;
 			Heading("Parts", ref y);
-			Row(ref y, ("Unlock every part and weapon", UnlockAll), ("Reset purchases", ResetPurchases));
+			Row(ref y, ("Unlock everything", UnlockAll), ("Reset purchases", ResetPurchases));
 
 			Heading("Items and money", ref y);
 			Row(ref y, ("Arc Reactor Mk I", () => Give(ModContent.ItemType<ArcReactorMk1>(), 1, "an Arc Reactor Mk I")),
@@ -214,11 +214,13 @@ namespace MarvelMod.Common.UI
 					count++;
 				}
 			}
-			status.SetText($"Unlocked {count} parts and weapons.");
+			ModPlayer.OwnedParts.Add(IronManPlayer.GiantSuitKey);
+			status.SetText($"Unlocked {count} parts and weapons, and the giant suit.");
 		}
 
 		private void ResetPurchases() {
 			ModPlayer.OwnedParts.Clear();
+			ModPlayer.giantForm = false;
 			SuitPresets.Classic().CopyTo(ModPlayer.Suit);
 			status.SetText("Purchases reset. Your suit is back to the classic parts.");
 		}

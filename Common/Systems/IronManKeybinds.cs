@@ -8,17 +8,20 @@ namespace MarvelMod.Common.Systems
 		public static ModKeybind SuitUp { get; private set; }
 		public static ModKeybind Workshop { get; private set; }
 		public static ModKeybind Store { get; private set; }
+		public static ModKeybind Giant { get; private set; }
 
 		public override void Load() {
 			SuitUp = KeybindLoader.RegisterKeybind(Mod, "SuitUp", "I");
 			Workshop = KeybindLoader.RegisterKeybind(Mod, "SuitWorkshop", "O");
 			Store = KeybindLoader.RegisterKeybind(Mod, "PartsStore", "P");
+			Giant = KeybindLoader.RegisterKeybind(Mod, "GiantSuit", "G");
 		}
 
 		public override void Unload() {
 			SuitUp = null;
 			Workshop = null;
 			Store = null;
+			Giant = null;
 		}
 	}
 }

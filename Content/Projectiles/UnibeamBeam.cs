@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 
 namespace MarvelMod.Content.Projectiles
 {
-	// The chest beam. Follows the cursor while the Unibeam is held, until it overheats.
+	// The chest beam. Follows the cursor while the Unibeam (or the giant suit's Giant Unibeam) is held, until it overheats.
 	// velocity is only used as the aim direction; the beam itself doesn't move.
 	public class UnibeamBeam : ModProjectile
 	{
@@ -45,7 +45,10 @@ namespace MarvelMod.Content.Projectiles
 
 		private int Cooldown => Mode switch { "Pulse" => 300, "Overcharge" => 600, _ => 360 };
 
-		private float Width => Mode switch { "Wide" => 26f, "Overcharge" => 18f, "Pulse" => 12f, _ => 10f };
+		// ai[1] = 1: fired by the giant suit, three times as wide.
+		private bool Giant => Projectile.ai[1] == 1f;
+
+		private float Width => (Giant ? 3f : 1f) * Mode switch { "Wide" => 26f, "Overcharge" => 18f, "Pulse" => 12f, _ => 10f };
 
 		// Pulse mode is only on for half of every 20 ticks.
 		private bool Firing => Mode != "Pulse" || Timer % 20 < 10;
@@ -68,7 +71,7 @@ namespace MarvelMod.Content.Projectiles
 
 		public override void AI() {
 			Player owner = Owner;
-			bool allowed = owner.HeldItem.ModItem is Unibeam ability && ability.IsAllowed(owner);
+			bool allowed = owner.HeldItem.ModItem is SuitAbility ability && ability is (Unibeam or GiantUnibeam) && ability.IsAllowed(owner);
 			if (!owner.active || owner.dead || !allowed || Timer >= MaxDuration
 				|| (Projectile.owner == Main.myPlayer && !owner.channel)) {
 				Projectile.Kill();

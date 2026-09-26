@@ -13,12 +13,14 @@ namespace MarvelMod
 			SyncSuit
 		}
 
-		// Sends a player's suit design. On a client, goes to the server, which forwards it to everyone else.
+		// Sends a player's suit design and whether they're in giant form. On a client, goes to the server, which forwards it to everyone else.
 		public static void SendSuit(Player player, int toWho, int fromWho) {
 			ModPacket packet = ModContent.GetInstance<MarvelMod>().GetPacket();
 			packet.Write((byte)PacketType.SyncSuit);
 			packet.Write((byte)player.whoAmI);
-			player.GetModPlayer<IronManPlayer>().Suit.Write(packet);
+			IronManPlayer modPlayer = player.GetModPlayer<IronManPlayer>();
+			modPlayer.Suit.Write(packet);
+			packet.Write(modPlayer.giantForm);
 			packet.Send(toWho, fromWho);
 		}
 
@@ -34,7 +36,9 @@ namespace MarvelMod
 						playerIndex = whoAmI; // a client may only change its own suit
 					}
 					Player player = Main.player[playerIndex];
-					player.GetModPlayer<IronManPlayer>().Suit.Read(reader);
+					IronManPlayer modPlayer = player.GetModPlayer<IronManPlayer>();
+					modPlayer.Suit.Read(reader);
+					modPlayer.giantForm = reader.ReadBoolean();
 					if (Main.netMode == NetmodeID.Server) {
 						SendSuit(player, -1, whoAmI);
 					}

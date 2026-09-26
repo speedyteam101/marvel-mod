@@ -19,7 +19,7 @@ namespace MarvelMod.Content.Buffs
 
 		public override void ModifyBuffText(ref string buffName, ref string tip, ref int rare) {
 			IronManPlayer modPlayer = Main.LocalPlayer.GetModPlayer<IronManPlayer>();
-			buffName = $"Iron Man (Mk {modPlayer.ReactorTier} reactor)";
+			buffName = $"Iron Man (Mk {modPlayer.ReactorTier} reactor){(modPlayer.giantForm ? ", giant suit" : "")}";
 			tip = modPlayer.Stats.ToString();
 		}
 	}

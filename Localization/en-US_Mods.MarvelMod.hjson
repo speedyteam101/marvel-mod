@@ -75,6 +75,80 @@ Items: {
 			'''
 	}
 
+	TitanPunch: {
+		DisplayName: Titan Punch
+		Tooltip: "[Giant suit] A huge punch that sends enemies flying"
+	}
+
+	GroundPound: {
+		DisplayName: Ground Pound
+		Tooltip:
+			'''
+			[Giant suit] Slam into the ground for a massive shockwave
+			Used in the air, you dive first
+			4 second cooldown
+			'''
+	}
+
+	MegaRepulsor: {
+		DisplayName: Mega Repulsor
+		Tooltip: "[Giant suit] An enormous repulsor blast that explodes"
+	}
+
+	MissileBarrage: {
+		DisplayName: Missile Barrage
+		Tooltip:
+			'''
+			[Giant suit] Launch 12 homing missiles
+			8 second cooldown
+			'''
+	}
+
+	GiantUnibeam: {
+		DisplayName: Giant Unibeam
+		Tooltip:
+			'''
+			[Giant suit] Hold to fire a Unibeam three times as wide
+			Shares the Unibeam's overheat cooldown
+			'''
+	}
+
+	ShockwaveClap: {
+		DisplayName: Shockwave Clap
+		Tooltip:
+			'''
+			[Giant suit] Clap to send a shockwave rolling along the ground
+			3 second cooldown
+			'''
+	}
+
+	RocketCharge: {
+		DisplayName: Rocket Charge
+		Tooltip:
+			'''
+			[Giant suit] Rocket towards the cursor, ramming everything in the way
+			5 second cooldown
+			'''
+	}
+
+	ShieldDome: {
+		DisplayName: Shield Dome
+		Tooltip:
+			'''
+			[Giant suit] For 6 seconds: take 40% less damage and enemy projectiles bounce off
+			30 second cooldown
+			'''
+	}
+
+	OrbitalStrike: {
+		DisplayName: Orbital Strike
+		Tooltip:
+			'''
+			[Giant suit] Mark the cursor's position; a moment later a beam strikes from orbit
+			20 second cooldown
+			'''
+	}
+
 	Unibeam: {
 		DisplayName: Unibeam
 		Tooltip:
@@ -100,10 +174,12 @@ Projectiles: {
 	WeaponSwing.DisplayName: Attached Weapon
 	WeaponThrown.DisplayName: Thrown Weapon
 	RailBeam.DisplayName: Railgun Beam
+	GiantAttack.DisplayName: Giant Suit
 }
 
 Keybinds: {
 	SuitUp.DisplayName: Suit Up
 	SuitWorkshop.DisplayName: Open Suit Workshop
 	PartsStore.DisplayName: Open Parts Store
+	GiantSuit.DisplayName: Giant Suit (transform)
 }

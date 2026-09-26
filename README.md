@@ -13,8 +13,9 @@ An unofficial, fan-made Marvel mod for **tModLoader** (Terraria 1.4.4). Become I
 3. Press **I** (Suit Up) or right-click with the Stark Tablet to suit up. Press it again to suit down.
 4. Press **O** (Suit Workshop) or left-click with the Stark Tablet to design your suit.
 5. Press **P** (Parts Store), or use the **Parts Store** button in the workshop, to buy more parts with coins.
+6. Once you've bought the Giant Suit, press **G** while suited up to become giant.
 
-All three keys can be changed in *Settings → Controls → Mod Controls*. If another mod already uses I, O or P, rebind them there.
+All four keys can be changed in *Settings → Controls → Mod Controls*. If another mod already uses I, O, P or G, rebind them there.
 
 ## Items
 
@@ -103,13 +104,37 @@ Damage below is base damage. Like the other abilities, it grows with bosses beat
 | **Arc Caster** | ranged | 50 | 18g | Plantera | Lightning hits the enemy nearest your cursor and chains to 3 more |
 | **Buzzsaw Launcher** | ranged | 40 | 10g | Wall of Flesh | Saw blades that ricochet off walls up to 4 times |
 
+## Giant suit
+
+![Normal suit and giant suit at in-game scale](docs/giant.png)
+
+Buy the **Giant Suit** for **50 platinum** at the top of the Parts Store's Premium Sets tab. While suited up, press **G** (the Giant Suit key, rebindable) or use **Transform** in the store to become a giant version of your own suit design, drawn twice as big. Press it again to turn back. Giant form ends if you suit down.
+
+In giant form you get **+80 defense, +25% damage reduction, +50% damage and no knockback**, but you move 20% slower and fly 25% slower. Your collision box stays normal-sized; only the sprite is giant (resizing the hitbox breaks collision with blocks).
+
+Your normal suit abilities are replaced by nine giant ones. Damage is base damage (it scales like the other abilities):
+
+| Ability | Damage | Cooldown | What it does |
+| --- | --- | --- | --- |
+| **Titan Punch** | 150 | - | Huge punch in front of you, massive knockback |
+| **Ground Pound** | 200 | 4 s | Slam the ground for a big shockwave; in the air you dive first |
+| **Mega Repulsor** | 120 | - | Enormous repulsor blast with a huge explosion |
+| **Missile Barrage** | 60 x 12 | 8 s | Twelve homing missiles from the shoulders |
+| **Giant Unibeam** | 90 | Unibeam overheat | A Unibeam three times as wide |
+| **Shockwave Clap** | 110 | 3 s | A shockwave that rolls along the ground |
+| **Rocket Charge** | 130 | 5 s | Rocket towards the cursor, ramming enemies, briefly invincible |
+| **Shield Dome** | - | 30 s | 6 seconds of 40% less damage; enemy projectiles bounce off |
+| **Orbital Strike** | 350 | 20 s | Mark the cursor's position; a beam hits it from orbit a moment later |
+
+Cooldowns show as a countdown on the ability's icon.
+
 ## Admin panel
 
 Type **`admin!`** in chat and press Enter. The message isn't sent. Instead a password box opens; enter the admin password to open the admin panel. After that, `admin!` opens the panel straight away until you close the game or reload mods.
 
 The panel only affects your own character:
 
-- **Parts:** unlock every part and weapon, or reset all purchases (your suit goes back to the classic parts).
+- **Parts:** unlock every part, weapon and the giant suit, or reset all purchases (your suit goes back to the classic parts).
 - **Items and money:** Arc Reactor Mk I / II / III, a Stark Tablet, 1 or 10 platinum coins.
 - **Cheats** (not saved): god mode, super flight (2x flight speed and acceleration), no Unibeam cooldown, full heal.
 

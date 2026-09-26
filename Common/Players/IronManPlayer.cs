@@ -37,6 +37,14 @@ namespace MarvelMod.Common.Players
 		public SuitStats Stats {
 			get {
 				SuitStats stats = SuitStats.For(Suit, ReactorTier);
+				if (giantForm) {
+					stats.Defense += 80;
+					stats.DamageReduction += 25;
+					stats.Damage += 50;
+					stats.MoveSpeed -= 20;
+					stats.FlightSpeed *= 0.75f;
+					stats.NoKnockback = true;
+				}
 				if (adminSuperFlight) {
 					stats.FlightSpeed *= 2f;
 					stats.FlightAcceleration *= 2f;
@@ -52,6 +60,73 @@ namespace MarvelMod.Common.Players
 
 		// Ticks until the Unibeam can fire again.
 		public int unibeamCooldown;
+
+		// The giant suit: bought once in the Parts Store, then toggled while suited up.
+		public const string GiantSuitKey = "special/giant-suit";
+		public const long GiantSuitPrice = 50 * SuitShop.Platinum;
+
+		public bool giantForm;
+		public readonly int[] giantCooldowns = new int[GiantAbility.Count];
+		public int domeTimer;
+		private bool groundPounding;
+		private int groundPoundDamage;
+
+		public bool OwnsGiantSuit => OwnedParts.Contains(GiantSuitKey);
+
+		public string BuyGiantSuit() {
+			if (OwnsGiantSuit) {
+				return "You already own the giant suit.";
+			}
+			if (!Player.BuyItem(GiantSuitPrice)) {
+				return "You need 50 platinum for the giant suit.";
+			}
+			OwnedParts.Add(GiantSuitKey);
+			SoundEngine.PlaySound(SoundID.Coins);
+			return "Bought the giant suit! Suit up and press the Giant Suit key (G) to transform.";
+		}
+
+		public void ToggleGiant() {
+			if (!OwnsGiantSuit) {
+				Main.NewText("Buy the giant suit in the Parts Store first (50 platinum).", Color.Orange);
+				return;
+			}
+			if (!giantForm && !SuitActive) {
+				Main.NewText("Suit up before becoming the giant suit.", Color.Orange);
+				return;
+			}
+			giantForm = !giantForm;
+			SoundEngine.PlaySound(giantForm ? SoundID.Item113 : SoundID.Item37, Player.Center);
+			for (int i = 0; i < 50; i++) {
+				Dust dust = Dust.NewDustDirect(Player.position - new Vector2(30f, 60f), Player.width + 60, Player.height + 60, DustID.Electric);
+				dust.noGravity = true;
+				dust.velocity *= 2f;
+			}
+		}
+
+		// Ground Pound: slam straight away if standing, otherwise dive and slam on landing.
+		public void StartGroundPound(int damage) {
+			groundPoundDamage = damage;
+			if (Player.velocity.Y == 0f) {
+				Slam();
+			}
+			else {
+				groundPounding = true;
+				Player.velocity.Y = 20f * Player.gravDir;
+			}
+		}
+
+		private void Slam() {
+			groundPounding = false;
+			SoundEngine.PlaySound(SoundID.Item14, Player.Bottom);
+			SoundEngine.PlaySound(SoundID.Item62, Player.Bottom);
+			if (Player.whoAmI == Main.myPlayer) {
+				Projectile.NewProjectile(Player.GetSource_FromThis(), Player.Bottom, Vector2.Zero, ModContent.ProjectileType<SuitExplosion>(),
+					groundPoundDamage, 12f, Player.whoAmI, 260f);
+			}
+			for (int i = 0; i < 40; i++) {
+				Dust.NewDustDirect(Player.Bottom - new Vector2(130f, 10f), 260, 20, DustID.Smoke, Main.rand.NextFloat(-6f, 6f), -3f, 80, default, 2f);
+			}
+		}
 
 		// Admin panel cheats (not saved).
 		public bool adminGodMode;
@@ -173,6 +248,9 @@ namespace MarvelMod.Common.Players
 			if (IronManKeybinds.Store.JustPressed) {
 				SuitWorkshopSystem.ToggleStore();
 			}
+			if (IronManKeybinds.Giant.JustPressed) {
+				ToggleGiant();
+			}
 		}
 
 		public override void PostUpdateEquips() {
@@ -182,10 +260,14 @@ namespace MarvelMod.Common.Players
 				Player.ClearBuff(buff);
 			}
 			if (!SuitActive) {
+				giantForm = false;
 				return;
 			}
 
 			Stats.Apply(Player);
+			if (domeTimer > 0) {
+				Player.endurance += 0.4f;
+			}
 			Player.noFallDmg = true;
 			Player.gills = true; // sealed helmet
 			if (ReactorTier >= 3) {
@@ -454,6 +536,13 @@ namespace MarvelMod.Common.Players
 				shieldTimer--;
 			}
 
+			for (int i = 0; i < giantCooldowns.Length; i++) {
+				if (giantCooldowns[i] > 0) {
+					giantCooldowns[i] = adminNoCooldowns ? 0 : giantCooldowns[i] - 1;
+				}
+			}
+			UpdateGiantEffects();
+
 			UpdateFrame();
 
 			if (SuitActive) {
@@ -486,6 +575,50 @@ namespace MarvelMod.Common.Players
 			else {
 				walkCounter = 0;
 				frame = SuitFrame.Idle;
+			}
+		}
+
+		private void UpdateGiantEffects() {
+			if (groundPounding) {
+				if (!giantForm || Player.dead) {
+					groundPounding = false;
+				}
+				else if (Player.velocity.Y == 0f) {
+					Slam();
+				}
+				else {
+					Player.velocity.Y = 20f * Player.gravDir;
+					Player.fallStart = (int)(Player.position.Y / 16f);
+				}
+			}
+
+			if (domeTimer <= 0) {
+				return;
+			}
+			domeTimer--;
+			if (!giantForm) {
+				domeTimer = 0;
+				return;
+			}
+			const float Radius = 110f;
+			for (int i = 0; i < 3; i++) {
+				Vector2 point = Player.Center + Main.rand.NextVector2Unit() * Radius;
+				Dust dust = Dust.NewDustPerfect(point, DustID.TintableDustLighted, Vector2.Zero, 0, Suit.Colour(SuitCatalog.RepulsorColour), 1f);
+				dust.noGravity = true;
+			}
+			Lighting.AddLight(Player.Center, Suit.Colour(SuitCatalog.RepulsorColour).ToVector3() * 0.4f);
+
+			// Bounce enemy projectiles off the dome (done where they're simulated: the server, or single player).
+			if (Main.netMode == NetmodeID.MultiplayerClient) {
+				return;
+			}
+			foreach (Projectile other in Main.ActiveProjectiles) {
+				if (other.hostile && !other.friendly && Vector2.Distance(other.Center, Player.Center) < Radius) {
+					other.velocity = (other.Center - Player.Center).SafeNormalize(Vector2.UnitY) * other.velocity.Length();
+					other.hostile = false;
+					other.friendly = true;
+					other.netUpdate = true;
+				}
 			}
 		}
 
@@ -646,10 +779,11 @@ namespace MarvelMod.Common.Players
 
 		public override void CopyClientState(ModPlayer targetCopy) {
 			Suit.CopyTo(((IronManPlayer)targetCopy).Suit);
+			((IronManPlayer)targetCopy).giantForm = giantForm;
 		}
 
 		public override void SendClientChanges(ModPlayer clientPlayer) {
-			if (!Suit.SameAs(((IronManPlayer)clientPlayer).Suit)) {
+			if (!Suit.SameAs(((IronManPlayer)clientPlayer).Suit) || giantForm != ((IronManPlayer)clientPlayer).giantForm) {
 				MarvelMod.SendSuit(Player, -1, -1);
 			}
 		}

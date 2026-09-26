@@ -48,8 +48,10 @@ namespace MarvelMod.Common.Players
 			Vector2 origin = player.gravDir < 0f ? new Vector2(SuitRenderer.Origin.X, SuitRenderer.FrameHeight - SuitRenderer.Origin.Y) : SuitRenderer.Origin;
 			Rectangle source = SuitRenderer.FrameRect(modPlayer.frame);
 
-			drawInfo.DrawDataCache.Add(new DrawData(textures.Body, feet, source, light, rotation, origin, Scale, effects, 0));
-			drawInfo.DrawDataCache.Add(new DrawData(textures.Glow, feet, source, glow, rotation, origin, Scale, effects, 0));
+			// The giant suit is the same design drawn twice as big.
+			float scale = modPlayer.giantForm ? Scale * 2f : Scale;
+			drawInfo.DrawDataCache.Add(new DrawData(textures.Body, feet, source, light, rotation, origin, scale, effects, 0));
+			drawInfo.DrawDataCache.Add(new DrawData(textures.Glow, feet, source, glow, rotation, origin, scale, effects, 0));
 		}
 	}
 }
