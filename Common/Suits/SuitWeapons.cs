@@ -80,7 +80,7 @@ namespace MarvelMod.Common.Suits
 			new() {
 				Name = "Riot Shield", Kind = WeaponKind.Shield, Melee = true, Damage = 30, UseTime = 20, Knockback = 9f,
 				Texture = "RiotShield", Stowed = StowedShape.Shield, Price = 5 * Gold,
-				Description = "Hold to block: +20 defense, 35% less damage, no knockback. Reflects enemy projectiles and bashes enemies it touches."
+				Description = "Hold to block: +20 defense, 35% less damage, no knockback. Destroys enemy projectiles that hit it and bashes enemies it touches."
 			},
 			new() {
 				Name = "Battle Axe", Kind = WeaponKind.Swing, Melee = true, Damage = 70, UseTime = 32, Reach = 60, Arc = 140, Knockback = 8f,

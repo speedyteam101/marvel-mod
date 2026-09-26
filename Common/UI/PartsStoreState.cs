@@ -389,7 +389,8 @@ namespace MarvelMod.Common.UI
 		private void Equip() {
 			IronManPlayer modPlayer = ModPlayer;
 			if (giantSelected) {
-				modPlayer.ToggleGiant();
+				string problem = modPlayer.ToggleGiant();
+				statusText.SetText(problem ?? (modPlayer.giantForm ? "You are now the giant suit." : "Back to normal size."));
 				UpdateLabels();
 				return;
 			}

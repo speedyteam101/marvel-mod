@@ -135,7 +135,7 @@ Items: {
 		DisplayName: Shield Dome
 		Tooltip:
 			'''
-			[Giant suit] For 6 seconds: take 40% less damage and enemy projectiles bounce off
+			[Giant suit] For 6 seconds: take 40% less damage and enemy projectiles that reach the dome are destroyed
 			30 second cooldown
 			'''
 	}

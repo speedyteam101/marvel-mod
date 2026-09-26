@@ -307,6 +307,11 @@ namespace MarvelMod.Common.UI
 				statusText.SetText($"Slot {slotIndex + 1} is empty");
 				return;
 			}
+			int missing = ModPlayer.MissingParts(design).Count;
+			if (missing > 0) {
+				statusText.SetText($"Slot {slotIndex + 1} uses {missing} part{(missing == 1 ? "" : "s")} you don't own (Parts Store)");
+				return;
+			}
 			design.CopyTo(Suit);
 			statusText.SetText($"Loaded slot {slotIndex + 1}");
 			UpdateLabels();

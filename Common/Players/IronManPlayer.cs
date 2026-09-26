@@ -85,14 +85,13 @@ namespace MarvelMod.Common.Players
 			return "Bought the giant suit! Suit up and press the Giant Suit key (G) to transform.";
 		}
 
-		public void ToggleGiant() {
+		// Returns why it couldn't transform, or null if it did.
+		public string ToggleGiant() {
 			if (!OwnsGiantSuit) {
-				Main.NewText("Buy the giant suit in the Parts Store first (50 platinum).", Color.Orange);
-				return;
+				return "Buy the giant suit in the Parts Store first (50 platinum).";
 			}
 			if (!giantForm && !SuitActive) {
-				Main.NewText("Suit up before becoming the giant suit.", Color.Orange);
-				return;
+				return "Suit up before becoming the giant suit.";
 			}
 			giantForm = !giantForm;
 			SoundEngine.PlaySound(giantForm ? SoundID.Item113 : SoundID.Item37, Player.Center);
@@ -101,12 +100,19 @@ namespace MarvelMod.Common.Players
 				dust.noGravity = true;
 				dust.velocity *= 2f;
 			}
+			return null;
+		}
+
+		// Standing on a block or platform. velocity.Y alone isn't enough: hovering can leave it at exactly 0 in mid-air.
+		private bool IsGrounded() {
+			Vector2 below = Player.gravDir > 0f ? Player.BottomLeft : Player.TopLeft - new Vector2(0f, 2f);
+			return Player.velocity.Y == 0f && Collision.SolidCollision(below, Player.width, 2, true);
 		}
 
 		// Ground Pound: slam straight away if standing, otherwise dive and slam on landing.
 		public void StartGroundPound(int damage) {
 			groundPoundDamage = damage;
-			if (Player.velocity.Y == 0f) {
+			if (IsGrounded()) {
 				Slam();
 			}
 			else {
@@ -120,13 +126,16 @@ namespace MarvelMod.Common.Players
 			SoundEngine.PlaySound(SoundID.Item14, Player.Bottom);
 			SoundEngine.PlaySound(SoundID.Item62, Player.Bottom);
 			if (Player.whoAmI == Main.myPlayer) {
+				// ai[2] = 1: counts as melee.
 				Projectile.NewProjectile(Player.GetSource_FromThis(), Player.Bottom, Vector2.Zero, ModContent.ProjectileType<SuitExplosion>(),
-					groundPoundDamage, 12f, Player.whoAmI, 260f);
+					groundPoundDamage, 12f, Player.whoAmI, 260f, 0f, 1f);
 			}
 			for (int i = 0; i < 40; i++) {
 				Dust.NewDustDirect(Player.Bottom - new Vector2(130f, 10f), 260, 20, DustID.Smoke, Main.rand.NextFloat(-6f, 6f), -3f, 80, default, 2f);
 			}
 		}
+
+		private const float MaxDamageReduction = 0.8f;
 
 		// Admin panel cheats (not saved).
 		public bool adminGodMode;
@@ -249,7 +258,10 @@ namespace MarvelMod.Common.Players
 				SuitWorkshopSystem.ToggleStore();
 			}
 			if (IronManKeybinds.Giant.JustPressed) {
-				ToggleGiant();
+				string problem = ToggleGiant();
+				if (problem != null) {
+					Main.NewText(problem, Color.Orange);
+				}
 			}
 		}
 
@@ -268,6 +280,8 @@ namespace MarvelMod.Common.Players
 			if (domeTimer > 0) {
 				Player.endurance += 0.4f;
 			}
+			// Stacked bonuses (reactor, plating, sets, giant form, dome) could otherwise reach 100% damage reduction.
+			Player.endurance = Math.Min(Player.endurance, MaxDamageReduction);
 			Player.noFallDmg = true;
 			Player.gills = true; // sealed helmet
 			if (ReactorTier >= 3) {
@@ -282,6 +296,7 @@ namespace MarvelMod.Common.Players
 				Player.endurance += 0.35f;
 				Player.noKnockback = true;
 			}
+			Player.endurance = Math.Min(Player.endurance, MaxDamageReduction);
 		}
 
 		private static readonly int[] GodlyImmunities = {
@@ -342,16 +357,20 @@ namespace MarvelMod.Common.Players
 		}
 
 		public override void OnHitNPCWithItem(Item item, NPC target, NPC.HitInfo hit, int damageDone) {
-			SetOnHit(target, damageDone, false);
+			SetOnHit(target, damageDone);
 		}
 
 		public override void OnHitNPCWithProj(Projectile proj, NPC target, NPC.HitInfo hit, int damageDone) {
-			SetOnHit(target, damageDone, proj.type == ModContent.ProjectileType<SuitExplosion>());
+			bool explosion = proj.type == ModContent.ProjectileType<SuitExplosion>();
+			bool setProc = proj.type == ModContent.ProjectileType<SuitShot>() && proj.ai[1] == SuitShot.SetProcFlag;
+			SetOnHit(target, damageDone, explosion, setProc);
 		}
 
-		// On-hit set bonuses. fromExplosion stops holy light from triggering more holy light.
-		private void SetOnHit(NPC target, int damageDone, bool fromExplosion) {
-			if (!SuitActive || Player.whoAmI != Main.myPlayer) {
+		// On-hit set bonuses.
+		// fromExplosion: hits from blasts don't count for Cyber missiles or Godly holy light, so those can't chain off
+		// their own explosions. setProc: shots created by a set bonus (Dragon fire, Cyber missiles) never trigger another.
+		private void SetOnHit(NPC target, int damageDone, bool fromExplosion = false, bool setProc = false) {
+			if (!SuitActive || Player.whoAmI != Main.myPlayer || setProc) {
 				return;
 			}
 			SuitSet set = SuitSets.WornBy(Suit);
@@ -369,7 +388,7 @@ namespace MarvelMod.Common.Players
 			}
 			else if (set == SuitSets.Dragon) {
 				target.AddBuff(BuffID.Daybreak, 180);
-				if (Main.rand.NextFloat() < 0.15f) {
+				if (!fromExplosion && Main.rand.NextFloat() < 0.15f) {
 					BreatheFire(target, damageDone);
 				}
 			}
@@ -381,7 +400,7 @@ namespace MarvelMod.Common.Players
 				cyberHits = 0;
 				Vector2 launch = new Vector2(Player.direction * 3f, -6f * Player.gravDir);
 				Projectile.NewProjectile(Player.GetSource_FromThis(), Player.Center, launch, ModContent.ProjectileType<SuitShot>(),
-					System.Math.Max(1, damageDone * 3 / 5), 3f, Player.whoAmI, (float)ShotKind.Missile);
+					System.Math.Max(1, damageDone * 3 / 5), 3f, Player.whoAmI, (float)ShotKind.Missile, SuitShot.SetProcFlag);
 			}
 			else if (set == SuitSets.Godly && !fromExplosion && Main.rand.NextFloat() < 0.1f) {
 				Projectile.NewProjectile(Player.GetSource_FromThis(), target.Center, Vector2.Zero, ModContent.ProjectileType<SuitExplosion>(),
@@ -398,7 +417,7 @@ namespace MarvelMod.Common.Players
 			SoundEngine.PlaySound(SoundID.Item34, mouth);
 			for (int i = 0; i < 4; i++) {
 				Projectile.NewProjectile(Player.GetSource_FromThis(), mouth, aim.RotatedByRandom(0.2f) * 10f, ModContent.ProjectileType<SuitShot>(),
-					System.Math.Max(1, damageDone / 4), 0.5f, Player.whoAmI, (float)ShotKind.Flame);
+					System.Math.Max(1, damageDone / 4), 0.5f, Player.whoAmI, (float)ShotKind.Flame, SuitShot.SetProcFlag);
 			}
 		}
 
@@ -474,6 +493,10 @@ namespace MarvelMod.Common.Players
 
 		// Flight, part 1: horizontal speed and gravity. Runs before vanilla applies gravity.
 		public override void PostUpdateRunSpeeds() {
+			if (groundPounding) {
+				Player.maxFallSpeed = 20f; // let the Ground Pound dive faster than normal falling
+				return;
+			}
 			if (!SuitActive || !flying) {
 				return;
 			}
@@ -489,9 +512,13 @@ namespace MarvelMod.Common.Players
 
 		// Flight, part 2: hold Jump in the air to fly up, hold Down to dive. Runs after gravity, before the player moves.
 		public override void PreUpdateMovement() {
-			// Standing on something (hovering in mid-air can also leave velocity.Y at exactly 0).
-			Vector2 below = Player.gravDir > 0f ? Player.BottomLeft : Player.TopLeft - new Vector2(0f, 2f);
-			bool grounded = Player.velocity.Y == 0f && Collision.SolidCollision(below, Player.width, 2, true);
+			if (groundPounding) {
+				// Diving for a Ground Pound: straight down, no flight.
+				flying = false;
+				Player.velocity.Y = 20f * Player.gravDir;
+				return;
+			}
+			bool grounded = IsGrounded();
 			if (!SuitActive || Player.mount.Active || Player.grappling[0] >= 0 || Player.pulley || Player.dead) {
 				flying = false;
 				return;
@@ -583,11 +610,10 @@ namespace MarvelMod.Common.Players
 				if (!giantForm || Player.dead) {
 					groundPounding = false;
 				}
-				else if (Player.velocity.Y == 0f) {
+				else if (IsGrounded()) {
 					Slam();
 				}
 				else {
-					Player.velocity.Y = 20f * Player.gravDir;
 					Player.fallStart = (int)(Player.position.Y / 16f);
 				}
 			}
@@ -608,16 +634,14 @@ namespace MarvelMod.Common.Players
 			}
 			Lighting.AddLight(Player.Center, Suit.Colour(SuitCatalog.RepulsorColour).ToVector3() * 0.4f);
 
-			// Bounce enemy projectiles off the dome (done where they're simulated: the server, or single player).
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				return;
-			}
+			// Destroy enemy projectiles that reach the dome. This runs on every machine: in multiplayer, projectile damage to
+			// a player is decided on that player's own client, so the server alone can't stop it.
 			foreach (Projectile other in Main.ActiveProjectiles) {
-				if (other.hostile && !other.friendly && Vector2.Distance(other.Center, Player.Center) < Radius) {
-					other.velocity = (other.Center - Player.Center).SafeNormalize(Vector2.UnitY) * other.velocity.Length();
-					other.hostile = false;
-					other.friendly = true;
-					other.netUpdate = true;
+				if (other.hostile && !other.friendly && other.damage > 0 && Vector2.Distance(other.Center, Player.Center) < Radius) {
+					for (int i = 0; i < 6; i++) {
+						Dust.NewDustDirect(other.position, other.width, other.height, DustID.Electric).noGravity = true;
+					}
+					other.Kill();
 				}
 			}
 		}
@@ -687,6 +711,16 @@ namespace MarvelMod.Common.Players
 			}
 			if (Main.mouseItem.ModItem is SuitAbility held && !held.IsAllowed(Player)) {
 				Main.mouseItem.TurnToAir();
+			}
+			// Abilities can't be kept: none in the trash slot, and only one of each in the inventory.
+			if (Player.trashItem.ModItem is SuitAbility) {
+				Player.trashItem.TurnToAir();
+			}
+			var seen = new HashSet<int>();
+			for (int i = 0; i < Player.inventory.Length; i++) {
+				if (Player.inventory[i].ModItem is SuitAbility && !seen.Add(Player.inventory[i].type)) {
+					Player.inventory[i].TurnToAir();
+				}
 			}
 			if (!SuitActive) {
 				return;

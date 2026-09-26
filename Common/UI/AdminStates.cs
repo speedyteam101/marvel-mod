@@ -26,28 +26,30 @@ namespace MarvelMod.Common.UI
 		public Action<string> OnSubmit;
 		public Action OnCancel;
 
-		public override void Update(GameTime gameTime) {
-			base.Update(gameTime);
+		// Text is read while drawing, like tModLoader's own text fields: the game switches text input off between Update
+		// and Draw, and typed characters only arrive while it is on.
+		protected override void DrawSelf(SpriteBatch spriteBatch) {
+			base.DrawSelf(spriteBatch);
+
 			PlayerInput.WritingText = true;
 			Main.instance.HandleIME();
 			string text = Main.GetInputText(Text);
 			if (text.Length <= MaxLength) {
 				Text = text;
 			}
-			if (Main.inputTextEnter) {
-				OnSubmit?.Invoke(Text);
-			}
-			else if (Main.inputTextEscape) {
-				OnCancel?.Invoke();
-			}
-		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			base.DrawSelf(spriteBatch);
 			CalculatedStyle inner = GetInnerDimensions();
 			bool caret = Main.GlobalTimeWrappedHourly % 1f < 0.5f;
 			string shown = new string('*', Text.Length) + (caret ? "|" : "");
 			Utils.DrawBorderString(spriteBatch, shown, new Vector2(inner.X + 4f, inner.Y + 2f), Color.White);
+
+			if (Main.inputTextEnter) {
+				OnSubmit?.Invoke(Text);
+			}
+			else if (Main.inputTextEscape) {
+				Main.blockKey = Microsoft.Xna.Framework.Input.Keys.Escape.ToString(); // don't also open the inventory
+				OnCancel?.Invoke();
+			}
 		}
 	}
 
@@ -190,8 +192,9 @@ namespace MarvelMod.Common.UI
 		}
 
 		private void Toggle(ref float y, int column, Func<string> label, Action flip) {
+			// The label reads the player, so it's filled in by Refresh when the panel opens, not while building the panel.
 			WorkshopButton button = null;
-			button = new WorkshopButton(label(), () => {
+			button = new WorkshopButton("", () => {
 				flip();
 				button.SetText(label());
 			});

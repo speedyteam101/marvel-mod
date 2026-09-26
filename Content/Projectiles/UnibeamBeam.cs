@@ -128,7 +128,8 @@ namespace MarvelMod.Content.Projectiles
 		}
 
 		public override void OnKill(int timeLeft) {
-			Owner.GetModPlayer<IronManPlayer>().unibeamCooldown = Cooldown;
+			// Cools down for as long as it was used, scaled to the full overheat (at least 1 second).
+			Owner.GetModPlayer<IronManPlayer>().unibeamCooldown = System.Math.Max(60, (int)(Cooldown * System.Math.Min(1f, Timer / MaxDuration)));
 		}
 
 		public override bool PreDraw(ref Color lightColor) {

@@ -150,6 +150,9 @@ namespace MarvelMod.Content.Abilities
 	public class GiantUnibeam : GiantAbility
 	{
 		public override int Slot => 4;
+		public override int RequiredTier => 2; // like the normal Unibeam
+
+		protected override float ModeDamage(Common.Suits.SuitConfig suit) => UnibeamBeam.DamageMultiplier(suit);
 
 		public override void SetDefaults() {
 			base.SetDefaults();
@@ -225,7 +228,7 @@ namespace MarvelMod.Content.Abilities
 		}
 	}
 
-	// 8. An energy dome: 40% less damage taken and enemy projectiles bounce off, for 6 seconds.
+	// 8. An energy dome: 40% less damage taken and enemy projectiles that reach it are destroyed, for 6 seconds.
 	public class ShieldDome : GiantAbility
 	{
 		public override int Slot => 7;

@@ -27,10 +27,14 @@ namespace MarvelMod.Content.Projectiles
 		MegaRepulsor
 	}
 
-	// Every suit projectile except the Unibeam and melee weapons. ai[0] is the ShotKind; ai[1] = 1 makes a repulsor piercing.
+	// Every suit projectile except the Unibeam and melee weapons. ai[0] is the ShotKind; ai[1] = 1 makes a repulsor piercing,
+	// ai[1] = SetProcFlag marks a set-bonus shot.
 	// ai[2] counts grenade bounces.
 	public class SuitShot : ModProjectile
 	{
+		// ai[1] value marking a shot created by a set bonus, so it can't trigger set bonuses itself (see IronManPlayer.SetOnHit).
+		public const float SetProcFlag = 2f;
+
 		private ShotKind Kind => (ShotKind)(int)Projectile.ai[0];
 
 		private bool Explosive => Kind is ShotKind.HeavyRepulsor or ShotKind.Missile or ShotKind.Rocket or ShotKind.ClusterBomb

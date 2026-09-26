@@ -48,7 +48,7 @@ While suited up you get:
 | --- | --- | --- |
 | **Repulsors** | Mk I+ | Palm blasts (28 base damage). Changes with *Repulsor Mode*. |
 | **Shoulder Weapon** | Mk I+ | Fires the weapon chosen in *Shoulder Weapon*. |
-| **Unibeam** | Mk II+ | Hold to fire a chest beam that stops at walls. It overheats after a few seconds, then cools down. Changes with *Unibeam Mode*. |
+| **Unibeam** | Mk II+ | Hold to fire a chest beam that stops at walls. It overheats after a few seconds; the cooldown is as long as you fired it for, relative to a full overheat. Changes with *Unibeam Mode*. |
 
 Ability damage grows after you beat Skeletron, the Wall of Flesh, any mechanical boss, Plantera and the Moon Lord (+10/+20/+20/+25/+50 base damage). It is then multiplied by 1x / 1.6x / 2.4x for the Mk I / II / III reactor.
 
@@ -87,7 +87,7 @@ Damage below is base damage. Like the other abilities, it grows with bosses beat
 | Weapon | Type | Damage | Price | Unlocks after | What it does |
 | --- | --- | --- | --- | --- | --- |
 | **Energy Sword** | melee | 48 | 5g | - | Glowing blade, wide swings |
-| **Riot Shield** | melee | 30 | 5g | - | Hold to block: +20 defense, 35% less damage, no knockback. Reflects enemy projectiles (single player / server side) and bashes enemies |
+| **Riot Shield** | melee | 30 | 5g | - | Hold to block: +20 defense, 35% less damage, no knockback. Destroys enemy projectiles that hit it and bashes enemies |
 | **Battle Axe** | melee | 70 | 6g | - | Slow heavy chops that ignore 20 defense |
 | **Throwing Spear** | ranged | 55 | 4g | - | Thrown, arcs down, pierces 3 enemies |
 | **Reaper Scythe** | melee | 60 | 12g | Wall of Flesh | Full 360° spin; hits heal you a little |
@@ -110,7 +110,7 @@ Damage below is base damage. Like the other abilities, it grows with bosses beat
 
 Buy the **Giant Suit** for **50 platinum** at the top of the Parts Store's Premium Sets tab. While suited up, press **G** (the Giant Suit key, rebindable) or use **Transform** in the store to become a giant version of your own suit design, drawn twice as big. Press it again to turn back. Giant form ends if you suit down.
 
-In giant form you get **+80 defense, +25% damage reduction, +50% damage and no knockback**, but you move 20% slower and fly 25% slower. Your collision box stays normal-sized; only the sprite is giant (resizing the hitbox breaks collision with blocks).
+In giant form you get **+80 defense, +25% damage reduction, +50% damage and no knockback** (damage reduction from the suit is capped at 80% in total), but you move 20% slower and fly 25% slower. Your collision box stays normal-sized; only the sprite is giant (resizing the hitbox breaks collision with blocks).
 
 Your normal suit abilities are replaced by nine giant ones. Damage is base damage (it scales like the other abilities):
 
@@ -120,10 +120,10 @@ Your normal suit abilities are replaced by nine giant ones. Damage is base damag
 | **Ground Pound** | 200 | 4 s | Slam the ground for a big shockwave; in the air you dive first |
 | **Mega Repulsor** | 120 | - | Enormous repulsor blast with a huge explosion |
 | **Missile Barrage** | 60 x 12 | 8 s | Twelve homing missiles from the shoulders |
-| **Giant Unibeam** | 90 | Unibeam overheat | A Unibeam three times as wide |
+| **Giant Unibeam** | 90 | Unibeam overheat | A Unibeam three times as wide; uses your Unibeam Mode; needs a Mk II reactor |
 | **Shockwave Clap** | 110 | 3 s | A shockwave that rolls along the ground |
 | **Rocket Charge** | 130 | 5 s | Rocket towards the cursor, ramming enemies, briefly invincible |
-| **Shield Dome** | - | 30 s | 6 seconds of 40% less damage; enemy projectiles bounce off |
+| **Shield Dome** | - | 30 s | 6 seconds of 40% less damage; enemy projectiles that reach the dome are destroyed |
 | **Orbital Strike** | 350 | 20 s | Mark the cursor's position; a beam hits it from orbit a moment later |
 
 Cooldowns show as a countdown on the ability's icon.

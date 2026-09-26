@@ -120,7 +120,7 @@ namespace MarvelMod.Content.Projectiles
 			}
 		}
 
-		// Held while the use button is held. Blocks, pushes enemies and reflects projectiles.
+		// Held while the use button is held. Blocks, pushes enemies and destroys enemy projectiles.
 		private void AimShield(Player owner) {
 			if (Projectile.owner == Main.myPlayer) {
 				if (!owner.channel || !owner.GetModPlayer<IronManPlayer>().SuitActive) {
@@ -139,19 +139,16 @@ namespace MarvelMod.Content.Projectiles
 			Projectile.timeLeft = 2;
 			owner.GetModPlayer<IronManPlayer>().shieldTimer = 2;
 
-			// Reflection is done where hostile projectiles are simulated: the server, or single player.
-			if (Main.netMode == NetmodeID.MultiplayerClient) {
-				return;
-			}
+			// Destroy enemy projectiles that hit the shield. This runs on every machine: in multiplayer, projectile damage to a
+			// player is decided on that player's own client, so the server alone can't stop it.
 			Rectangle shield = ShieldBox();
 			foreach (Projectile other in Main.ActiveProjectiles) {
 				if (other.hostile && !other.friendly && other.damage > 0 && other.Hitbox.Intersects(shield)) {
-					other.velocity = -other.velocity;
-					other.hostile = false;
-					other.friendly = true;
-					other.damage *= 2;
-					other.netUpdate = true;
+					for (int i = 0; i < 6; i++) {
+						Dust.NewDustDirect(other.position, other.width, other.height, DustID.Electric).noGravity = true;
+					}
 					SoundEngine.PlaySound(SoundID.Item150, other.Center);
+					other.Kill();
 				}
 			}
 		}
@@ -199,7 +196,7 @@ namespace MarvelMod.Content.Projectiles
 					if (!shockwaveDone && Projectile.owner == Main.myPlayer) {
 						shockwaveDone = true;
 						Projectile.NewProjectile(Projectile.GetSource_FromThis(), target.Center, Vector2.Zero, ModContent.ProjectileType<SuitExplosion>(),
-							damageDone / 2, 8f, Projectile.owner, 110f);
+							Projectile.damage / 2, 8f, Projectile.owner, 110f, 0f, 1f);
 						SoundEngine.PlaySound(SoundID.Item14, target.Center);
 					}
 					break;

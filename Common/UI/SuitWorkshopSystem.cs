@@ -25,15 +25,8 @@ namespace MarvelMod.Common.UI
 
 		public override void Load() {
 			if (!Main.dedServ) {
+				// The screens themselves are built the first time they're opened (see Build), when a player exists.
 				userInterface = new UserInterface();
-				state = new SuitWorkshopState();
-				state.Activate();
-				store = new PartsStoreState();
-				store.Activate();
-				passwordPrompt = new AdminPasswordState();
-				passwordPrompt.Activate();
-				adminPanel = new AdminPanelState();
-				adminPanel.Activate();
 			}
 		}
 
@@ -64,11 +57,19 @@ namespace MarvelMod.Common.UI
 			}
 		}
 
+		private static T Build<T>(ref T screen) where T : UIState, new() {
+			if (screen == null) {
+				screen = new T();
+				screen.Activate();
+			}
+			return screen;
+		}
+
 		public static void Open() {
 			if (userInterface == null) {
 				return;
 			}
-			state.Refresh();
+			Build(ref state).Refresh();
 			userInterface.SetState(state);
 			SoundEngine.PlaySound(SoundID.MenuOpen);
 		}
@@ -77,7 +78,7 @@ namespace MarvelMod.Common.UI
 			if (userInterface == null) {
 				return;
 			}
-			store.Refresh();
+			Build(ref store).Refresh();
 			userInterface.SetState(store);
 			SoundEngine.PlaySound(SoundID.MenuOpen);
 		}
@@ -86,7 +87,7 @@ namespace MarvelMod.Common.UI
 			if (userInterface == null) {
 				return;
 			}
-			passwordPrompt.Reset();
+			Build(ref passwordPrompt).Reset();
 			userInterface.SetState(passwordPrompt);
 			SoundEngine.PlaySound(SoundID.MenuOpen);
 		}
@@ -95,7 +96,7 @@ namespace MarvelMod.Common.UI
 			if (userInterface == null || !Systems.AdminSystem.Unlocked) {
 				return;
 			}
-			adminPanel.Refresh();
+			Build(ref adminPanel).Refresh();
 			userInterface.SetState(adminPanel);
 			SoundEngine.PlaySound(SoundID.MenuOpen);
 		}
@@ -106,6 +107,11 @@ namespace MarvelMod.Common.UI
 			}
 			userInterface.SetState(null);
 			SoundEngine.PlaySound(SoundID.MenuClose);
+		}
+
+		// Leaving a world closes whatever was open, so the next character doesn't see stale details.
+		public override void OnWorldUnload() {
+			userInterface?.SetState(null);
 		}
 
 		public override void UpdateUI(GameTime gameTime) {

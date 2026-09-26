@@ -34,7 +34,7 @@ namespace MarvelMod.Common.Systems
 
 		// Runs every frame after input is read and just before the game handles chat.
 		public override void PostUpdateInput() {
-			if (Main.dedServ) {
+			if (Main.dedServ || Main.gameMenu) {
 				return;
 			}
 

@@ -5,7 +5,8 @@ using Terraria.ModLoader;
 namespace MarvelMod.Content.Projectiles
 {
 	// Invisible blast left behind by missiles, rockets, bombs and heavy repulsors, and the Godly set's holy light.
-	// ai[0] is the blast diameter in pixels; ai[1] = 1 makes it holy light, 2 an electric zap (Arc Caster), instead of fire.
+	// ai[0] is the blast diameter in pixels; ai[1] = 1 makes it holy light, 2 an electric zap (Arc Caster), instead of fire;
+	// ai[2] = 1 makes it melee damage.
 	public class SuitExplosion : ModProjectile
 	{
 		public override string Texture => "MarvelMod/Content/Projectiles/SuitShot";
@@ -28,6 +29,9 @@ namespace MarvelMod.Content.Projectiles
 				return;
 			}
 			Projectile.localAI[0] = 1f;
+			if (Projectile.ai[2] == 1f) {
+				Projectile.DamageType = DamageClass.Melee; // Ground Pound, Warhammer shockwave
+			}
 			int size = (int)Projectile.ai[0];
 			Projectile.Resize(size, size);
 

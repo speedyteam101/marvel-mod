@@ -49,11 +49,11 @@ namespace MarvelMod.Common.Suits
 			}
 		}
 
-		// Saved by category key, so adding categories later doesn't break old saves.
+		// Saved by category key and option name, so adding categories or options later doesn't break old saves.
 		public TagCompound Save() {
 			var tag = new TagCompound();
 			foreach (SuitCategory category in SuitCatalog.All) {
-				tag[category.Key] = (int)this[category];
+				tag[category.Key] = OptionName(category); // by name, so adding options later can't change saved suits
 			}
 			return tag;
 		}
@@ -65,11 +65,29 @@ namespace MarvelMod.Common.Suits
 				return config;
 			}
 			foreach (SuitCategory category in SuitCatalog.All) {
-				if (tag.ContainsKey(category.Key)) {
-					config[category] = tag.GetInt(category.Key);
+				if (!tag.ContainsKey(category.Key)) {
+					continue;
+				}
+				if (tag[category.Key] is string name) {
+					int index = category.IsColour ? System.Array.IndexOf(SuitPalette.Names, name) : IndexOfName(category, name);
+					if (index >= 0) {
+						config[category] = index;
+					}
+				}
+				else {
+					config[category] = tag.GetInt(category.Key); // saves from before options were saved by name
 				}
 			}
 			return config;
+		}
+
+		private static int IndexOfName(SuitCategory category, string name) {
+			for (int i = 0; i < category.Count; i++) {
+				if (category.OptionName(i) == name) {
+					return i;
+				}
+			}
+			return -1;
 		}
 
 		public void Write(BinaryWriter writer) => writer.Write(Values);
